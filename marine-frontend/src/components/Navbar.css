@@ -1,0 +1,270 @@
+.navbar {
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 20px;
+
+  background: #061a29;
+
+  border-bottom: 1px solid #536673;
+
+  color: #b4c4cf;
+
+  position: relative;
+  z-index: 20;
+}
+
+
+/* ---------------- BRAND ---------------- */
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  width: 190px;
+
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar-logo {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #09b5d5;
+
+  color: #00212c;
+}
+
+.navbar-title {
+  font-size: 13px;
+  font-weight: 800;
+
+  color: #f1f5f7;
+
+  letter-spacing: 0.3px;
+}
+
+.navbar-subtitle {
+  margin-top: 1px;
+
+  font-size: 8px;
+
+  color: #32c5df;
+
+  letter-spacing: 1.5px;
+}
+
+
+/* ---------------- LINKS ---------------- */
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  flex: 1;
+}
+
+.nav-item {
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 0 9px;
+
+  border-radius: 6px;
+
+  color: #8298a8;
+
+  font-size: 11px;
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  transition: 0.2s ease;
+}
+
+.nav-item:hover {
+  color: #d6e4eb;
+  background: #0b2738;
+}
+
+.nav-item.active {
+  color: #23c7e5;
+  background: #082b3c;
+}
+
+.nav-item svg {
+  flex-shrink: 0;
+}
+
+
+/* ---------------- ACTIONS ---------------- */
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.nav-icon-button,
+.language-button,
+.sos-button,
+.profile-button {
+  height: 32px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  text-decoration: none;
+}
+
+.nav-icon-button {
+  width: 34px;
+
+  border: 1px solid #647783;
+
+  background: #071b2a;
+
+  color: #bdcbd3;
+
+  position: relative;
+}
+
+.notification-dot {
+  position: absolute;
+
+  top: -5px;
+  right: -4px;
+
+  width: 14px;
+  height: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #e83e46;
+
+  color: white;
+
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.language-button {
+  gap: 6px;
+
+  padding: 0 11px;
+
+  border: 1px solid #6c7d88;
+
+  background: #071b2a;
+
+  color: #d6e0e5;
+
+  font-size: 11px;
+}
+
+.sos-button {
+  gap: 6px;
+
+  padding: 0 12px;
+
+  border: 1px solid #e45454;
+
+  background: #351b21;
+
+  color: #ff6d6d;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.6px;
+}
+
+.profile-button {
+  width: 34px;
+
+  border: 1px solid #647783;
+
+  background: #071b2a;
+
+  color: #bdcbd3;
+}
+
+.nav-icon-button:hover,
+.language-button:hover,
+.profile-button:hover {
+  border-color: #20bcd9;
+  color: #24c9e5;
+}
+
+
+/* ---------------- RESPONSIVE ---------------- */
+
+@media (max-width: 1100px) {
+  .navbar-brand {
+    width: 160px;
+  }
+
+  .nav-item {
+    padding: 0 6px;
+    font-size: 10px;
+  }
+
+  .nav-item span {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .navbar {
+    padding: 0 12px;
+  }
+
+  .navbar-brand {
+    width: auto;
+    margin-right: 10px;
+  }
+
+  .navbar-subtitle {
+    display: none;
+  }
+
+  .navbar-links {
+    display: none;
+  }
+
+  .navbar-actions {
+    margin-left: auto;
+  }
+
+  .sos-button {
+    padding: 0 8px;
+  }
+}
