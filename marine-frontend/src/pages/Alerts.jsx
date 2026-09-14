@@ -9,11 +9,29 @@ import {
   RotateCcw,
   Compass,
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
+import { useAppData } from "../state/useAppData";
 import "./Alerts.css";
 
 export default function Alerts() {
+  const navigate = useNavigate();
+  const { state, acknowledgeAlert, markAlertRead, dismissAlert, selectRoute } = useAppData();
+  const { imbl } = state;
+  const [filter, setFilter] = useState("All");
+  const [replayed, setReplayed] = useState(false);
+  const visibleAlerts = state.alerts.filter((alert) => {
+    if (filter === "All") return alert.status !== "dismissed";
+    if (filter === "Active") return ["active", "read"].includes(alert.status);
+    if (filter === "Acknowledged") return alert.status === "acknowledged";
+    if (filter === "Critical") return alert.severity === "CRITICAL";
+    if (filter === "Warning") return alert.severity === "WARNING";
+    if (filter === "Caution") return alert.severity === "CAUTION";
+    return true;
+  });
+
   return (
     <div className="alerts-page">
       <Navbar />
@@ -30,9 +48,15 @@ export default function Alerts() {
             </p>
           </div>
 
-          <button className="replay-alert">
+          {state.dataSources.degraded && (
+            <div className="alerts-degraded-state" role="status">
+              {state.dataSources.message} Some recommendations may have reduced confidence.
+            </div>
+          )}
+
+          <button className="replay-alert" onClick={() => setReplayed(true)}>
             <Bell size={15} />
-            Replay hazard push alert
+            {replayed ? "Hazard alert replayed" : "Replay hazard push alert"}
           </button>
         </div>
 
@@ -42,17 +66,17 @@ export default function Alerts() {
 
           <div className="summary-box critical-summary">
             <span>CRITICAL</span>
-            <strong>1</strong>
+            <strong>{state.alerts.filter((alert) => alert.severity === "CRITICAL").length}</strong>
           </div>
 
           <div className="summary-box warning-summary">
             <span>WARNING</span>
-            <strong>2</strong>
+            <strong>{state.alerts.filter((alert) => alert.severity === "WARNING").length}</strong>
           </div>
 
           <div className="summary-box info-summary">
-            <span>INFORMATION</span>
-            <strong>3</strong>
+            <span>CAUTION</span>
+            <strong>{state.alerts.filter((alert) => alert.severity === "CAUTION").length}</strong>
           </div>
 
         </div>
@@ -69,13 +93,13 @@ export default function Alerts() {
 
             <div>
               <div className="featured-type">
-                WARNING
+                {imbl.status}
               </div>
 
               <h2>IMBL Proximity Warning</h2>
 
               <p>
-                You are 1.8 km from the International Maritime Boundary Line.
+                {imbl.warning}
               </p>
             </div>
 
@@ -87,7 +111,7 @@ export default function Alerts() {
 
             <div>
               <span>DISTANCE TO IMBL</span>
-              <strong>1.8 km</strong>
+              <strong>{imbl.distanceKm} km</strong>
             </div>
 
             <div>
@@ -97,7 +121,7 @@ export default function Alerts() {
 
             <div>
               <span>STATUS</span>
-              <strong className="orange-text">WARNING</strong>
+              <strong className="orange-text">{imbl.status}</strong>
             </div>
 
           </div>
@@ -123,12 +147,12 @@ export default function Alerts() {
 
           <div className="featured-actions">
 
-            <button className="return-safe">
+            <button className="return-safe" onClick={() => { selectRoute("safer", "IMBL safety"); navigate("/routes"); }}>
               <Compass size={15} />
               Return to Safe Route
             </button>
 
-            <button className="show-map">
+            <button className="show-map" onClick={() => navigate("/map?focus=imbl")}>
               Show IMBL on map
             </button>
 
@@ -153,104 +177,44 @@ export default function Alerts() {
 
         <div className="alert-filters">
 
-          <button className="filter active">
-            All
-          </button>
-
-          <button className="filter">
-            Critical
-          </button>
-
-          <button className="filter">
-            Warning
-          </button>
-
-          <button className="filter">
-            Information
-          </button>
-
-          <button className="filter">
-            Resolved / Safe
-          </button>
+          {["All", "Active", "Critical", "Warning", "Caution", "Acknowledged"].map((item) => (
+            <button
+              className={`filter ${filter === item ? "active" : ""}`}
+              key={item}
+              onClick={() => setFilter(item)}
+            >
+              {item}
+            </button>
+          ))}
 
         </div>
 
         {/* ================= ALERT LIST ================= */}
 
         <section className="alert-list">
-
-          {/* IMBL */}
-
-          <AlertRow
-            type="CRITICAL"
-            tag="IMBL"
-            title="IMBL proximity warning"
-            description="You are 1.8 km from the International Maritime Boundary Line, bearing south-west."
-            time="14:28 IST · 4 min ago"
-            location="19.6200° N, 71.9500° E"
-            confidence="97%"
-            sources={["GPS", "SATELLITE"]}
-            button="Return to safe route"
-            critical
-          />
-
-          {/* WAVE */}
-
-          <AlertRow
-            type="WARNING"
-            tag="WEATHER"
-            title="High-wave zone ahead"
-            description="Significant wave height of 2.8 m recorded 6 km along your current heading."
-            time="14:12 IST · 20 min ago"
-            location="Sector AR-14"
-            confidence="92%"
-            sources={["INCOIS", "IMD"]}
-            button="View safer route"
-            acknowledged
-          />
-
-          {/* HAZARD */}
-
-          <AlertRow
-            type="WARNING"
-            tag="HAZARD"
-            title="Potential hazard detected"
-            description="A potential maritime hazard has been detected 16 km from your planned route."
-            time="13:56 IST · 36 min ago"
-            location="19.8400° N, 71.2800° E"
-            confidence="84%"
-            sources={["SATELLITE", "AIS"]}
-            button="View hazard"
-          />
-
-          {/* SAFE */}
-
-          <AlertRow
-            type="SAFE"
-            tag="ROUTE"
-            title="Safer route available"
-            description="An alternative route adds 5 km but avoids the high-wave zone entirely."
-            time="13:40 IST · 52 min ago"
-            location="Route VS-02"
-            confidence="89%"
-            sources={["OCEAN MODEL", "INCOIS"]}
-            button="Switch route"
-          />
-
-          {/* INFO */}
-
-          <AlertRow
-            type="INFO"
-            tag="ZONE"
-            title="Fishing zone updated"
-            description="Zone A potential upgraded to HIGH after the latest chlorophyll pass."
-            time="12:05 IST · 2 h ago"
-            location="19.9000° N, 71.6200° E"
-            confidence="91%"
-            sources={["MOSDAC", "INCOIS"]}
-            button="View zone"
-          />
-
+          {visibleAlerts.map((alert) => (
+            <AlertRow
+              key={alert.id}
+              type={alert.severity}
+              tag={alert.type}
+              title={alert.title}
+              description={alert.message}
+              time={alert.timestamp}
+              location={alert.location}
+              confidence={`${state.risk.confidence.score}%`}
+              sources={alert.sources}
+              button={alert.type === "IMBL" ? "View IMBL" : "View map"}
+              alertId={alert.id}
+              alertState={alert}
+              read={alert.read}
+              onAcknowledge={acknowledgeAlert}
+              onDismiss={dismissAlert}
+              onAction={() => {
+                markAlertRead(alert.id);
+                navigate(alert.mapPath);
+              }}
+            />
+          ))}
         </section>
 
       </main>
@@ -275,7 +239,18 @@ function AlertRow({
   button,
   critical = false,
   acknowledged = false,
+  alertId,
+  alertState,
+  read = false,
+  hidden = false,
+  onAcknowledge,
+  onDismiss,
+  onAction,
 }) {
+  if (hidden) return null;
+
+  const isAcknowledged = alertState?.status === "acknowledged" || acknowledged;
+
   return (
     <article className={`alert-row ${type.toLowerCase()}`}>
 
@@ -293,9 +268,11 @@ function AlertRow({
             {tag}
           </span>
 
+          {!read && <span className="acknowledged">UNREAD</span>}
+
           <h3>{title}</h3>
 
-          {acknowledged && (
+          {isAcknowledged && (
             <span className="acknowledged">
               ✓ Acknowledged
             </span>
@@ -349,16 +326,23 @@ function AlertRow({
               ? "row-primary critical-button"
               : "row-primary"
           }
+          onClick={onAction}
         >
           {button}
         </button>
 
         <button
           className={`row-ack ${
-            acknowledged ? "disabled-ack" : ""
+            isAcknowledged ? "disabled-ack" : ""
           }`}
+          onClick={() => alertId && onAcknowledge(alertId)}
+          disabled={isAcknowledged}
         >
-          {acknowledged ? "Acknowledged" : "Acknowledge"}
+          {isAcknowledged ? "Acknowledged" : "Acknowledge"}
+        </button>
+
+        <button className="row-ack" onClick={() => onDismiss(alertId)}>
+          Dismiss
         </button>
 
       </div>

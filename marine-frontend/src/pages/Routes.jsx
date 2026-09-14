@@ -1,22 +1,24 @@
 import { useState } from "react";
 import {
   Navigation,
-  Flag,
   Anchor,
   Shield,
   Sparkles,
   Clock3,
-  Route as RouteIcon,
   ChevronUp,
   ChevronDown,
-  MapPin,
 } from "lucide-react";
-
+import MarineLeafletMap from "../components/MarineLeafletMap";
 import Navbar from "../components/Navbar";
+import { useAppData } from "../state/useAppData";
 import "./Routes.css";
 
 export default function Routes() {
-  const [selectedRoute, setSelectedRoute] = useState("safer");
+  const { state, selectRoute } = useAppData();
+  const selectedRoute = state.selectedRouteId;
+  const routeOptions = state.routes.routes;
+  const fastestRoute = routeOptions.find((route) => route.id === "fastest");
+  const saferRoute = routeOptions.find((route) => route.id === "safer");
   const [showReasoning, setShowReasoning] = useState(true);
 
   return (
@@ -36,112 +38,23 @@ export default function Routes() {
           </div>
 
           <span className="prepared-badge">
-            DEMO / PREPARED DATA
+            {state.routeChangeReason ? `${state.routeChangeReason} / PREPARED DATA` : "DEMO / PREPARED DATA"}
           </span>
         </div>
 
         <div className="routes-layout">
 
           {/* ================= MAP ================= */}
-          <section className="route-map-panel">
-
-            <div className="map-grid"></div>
-
-            {/* Latitude labels */}
-            <div className="latitude lat-1">21°N</div>
-            <div className="latitude lat-2">20°N</div>
-            <div className="latitude lat-3">19°N</div>
-            <div className="latitude lat-4">18°N</div>
-
-            {/* Sea / land shape */}
-            <div className="coastline"></div>
-
-            {/* Risk zone */}
-            <div className="risk-zone"></div>
-
-            {/* Hazard markers */}
-            <div className="hazard hz-1">▲</div>
-            <div className="hazard hz-2">▲</div>
-
-            {/* Fishing zones */}
-            <div className="fishing-zone zone-a">
-              <span className="zone-dot"></span>
-              Zone A
-            </div>
-
-            <div className="fishing-zone zone-b">
-              <span className="zone-dot"></span>
-              Zone B
-            </div>
-
-            <div className="fishing-zone zone-c">
-              <span className="zone-dot"></span>
-              Zone C
-            </div>
-
-            {/* Route */}
-            <svg className="route-svg" viewBox="0 0 700 520">
-              {/* fastest route */}
-              <polyline
-                points="390,300 445,250 470,185 525,165"
-                className="fast-route-line"
-              />
-
-              {/* safer route */}
-              <polyline
-                points="390,300 430,330 480,300 535,260 570,205"
-                className="safe-route-line"
-              />
-            </svg>
-
-            {/* Current location */}
-            <div className="current-location">
-              <div className="location-pulse"></div>
-              <div className="location-arrow">▲</div>
-              <span>YOU</span>
-            </div>
-
-            {/* Destination */}
-            <div className="destination-marker">
-              <Flag size={13} />
-              <span>Zone A</span>
-            </div>
-
-            {/* Harbour */}
-            <div className="harbour harbour-1">
-              <Anchor size={13} />
-              <span>Dahanu Jetty</span>
-            </div>
-
-            <div className="harbour harbour-2">
-              <Anchor size={13} />
-              <span>Vasai Safe Harbour</span>
-            </div>
-
-            {/* Map bottom information */}
-            <div className="map-bottom-info">
-
-              <div className="map-info-item">
-                <MapPin size={14} />
-                <span>Current location</span>
-                <strong>19.6200° N, 71.9500° E</strong>
-              </div>
-
-              <div className="map-info-item">
-                <Flag size={14} />
-                <span>Planned destination</span>
-                <strong>Zone A · 18 km</strong>
-              </div>
-
-              <div className="map-info-item">
-                <Anchor size={14} />
-                <span>Safe harbour</span>
-                <strong>Vasai · 18.4 km</strong>
-              </div>
-
-            </div>
-
-          </section>
+          <div className="route-map-panel">
+  <MarineLeafletMap
+    fishing={false}
+    vesselsVisible={false}
+    hazardsVisible={true}
+    ocean={true}
+    imbl={true}
+    route={true}
+  />
+</div>
 
           {/* ================= RIGHT PANEL ================= */}
           <section className="routes-sidebar">
@@ -149,7 +62,7 @@ export default function Routes() {
             {/* FASTEST ROUTE */}
             <div
               className={`route-card fastest-card ${
-                selectedRoute === "fastest" ? "route-selected" : ""
+                    selectedRoute === fastestRoute.id ? "route-selected" : ""
               }`}
             >
               <div className="route-card-header">
@@ -157,10 +70,10 @@ export default function Routes() {
                   <h2>FASTEST ROUTE</h2>
 
                   <div className="route-meta">
-                    <span>31 km</span>
+                    <span>{fastestRoute.distanceKm} km</span>
                     <span>
                       <Clock3 size={13} />
-                      1h 20m
+                      {fastestRoute.duration}
                     </span>
 
                     <span>
@@ -172,9 +85,9 @@ export default function Routes() {
 
                 <button
                   className="select-route-btn"
-                  onClick={() => setSelectedRoute("fastest")}
+                  onClick={() => selectRoute(fastestRoute.id)}
                 >
-                  {selectedRoute === "fastest" ? "Selected" : "Select"}
+                  {selectedRoute === fastestRoute.id ? "Selected" : "Select"}
                 </button>
               </div>
 
@@ -191,7 +104,7 @@ export default function Routes() {
             {/* SAFER ROUTE */}
             <div
               className={`route-card safer-card ${
-                selectedRoute === "safer" ? "route-selected" : ""
+                    selectedRoute === saferRoute.id ? "route-selected" : ""
               }`}
             >
               <div className="route-card-header">
@@ -204,11 +117,11 @@ export default function Routes() {
                   </div>
 
                   <div className="route-meta">
-                    <span>36 km</span>
+                    <span>{saferRoute.distanceKm} km</span>
 
                     <span>
                       <Clock3 size={13} />
-                      1h 32m
+                      {saferRoute.duration}
                     </span>
 
                     <span>
@@ -220,9 +133,9 @@ export default function Routes() {
 
                 <button
                   className="selected-route-btn"
-                  onClick={() => setSelectedRoute("safer")}
+                  onClick={() => selectRoute(saferRoute.id)}
                 >
-                  {selectedRoute === "safer" ? "Selected" : "Select"}
+                  {selectedRoute === saferRoute.id ? "Selected" : "Select"}
                 </button>
               </div>
 

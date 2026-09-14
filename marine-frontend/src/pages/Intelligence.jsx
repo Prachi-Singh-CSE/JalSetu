@@ -1,6 +1,7 @@
 import "./Intelligence.css";
 import Navbar from "../components/Navbar";
-
+import MarineLeafletMap from "../components/MarineLeafletMap";
+import { useAppData } from "../state/useAppData";
 const evidenceItems = [
   {
     type: "good",
@@ -21,6 +22,9 @@ const evidenceItems = [
 ];
 
 export default function Intelligence() {
+  const { state } = useAppData();
+  const { risk, dataSources } = state;
+
   return (
     <>
     <Navbar />
@@ -47,17 +51,17 @@ export default function Intelligence() {
             <div className="intelligence-status-top">
               <span className="fresh-badge">
                 <span className="fresh-dot"></span>
-                FRESH
+                {risk.confidence.level === "HIGH" ? "FRESH" : "CHECK DATA"}
               </span>
 
               <span className="updated-text">
-                Last updated 14 min ago
+                Last updated {state.marine.updatedAt}
               </span>
             </div>
 
             <div className="intelligence-tags">
               <span>SATELLITE DEMO DATA</span>
-              <span>AIS: DEMO / PROVIDER PENDING</span>
+              <span>AIS: {dataSources.sources.find((source) => source.id === "ais")?.status.toUpperCase()}</span>
             </div>
 
           </div>
@@ -92,44 +96,15 @@ export default function Intelligence() {
 
             {/* MAP */}
             <div className="sar-map">
-
-              {/* grid */}
-              <div className="map-grid"></div>
-
-              {/* latitude labels */}
-              <span className="lat lat-1">21°N</span>
-              <span className="lat lat-2">20°N</span>
-              <span className="lat lat-3">20°N</span>
-              <span className="lat lat-4">20°N</span>
-
-
-              {/* coastline / large red strip */}
-              <div className="coastline"></div>
-
-              {/* dashed boundary */}
-              <div className="boundary-line"></div>
-
-
-              {/* spill polygon */}
-              <div className="spill-area">
-                <div className="spill-inner"></div>
-              </div>
-
-
-              {/* vessel without AIS */}
-              <div className="vessel-marker"></div>
-
-
-              {/* current vessel */}
-              <div className="current-location">
-                <span></span>
-              </div>
-
-
-              {/* small vessel/aircraft marker */}
-              <div className="small-marker">▲</div>
-
-            </div>
+  <MarineLeafletMap
+    fishing={false}
+    vesselsVisible={true}
+    hazardsVisible={true}
+    ocean={false}
+    imbl={false}
+    route={false}
+  />
+</div>
 
 
             {/* MAP LEGEND */}
@@ -196,7 +171,12 @@ export default function Intelligence() {
 
                 <div className="detection-value">
                   <span>DETECTION CONFIDENCE</span>
-                  <strong>87%</strong>
+                  <strong>{risk.confidence.score}%</strong>
+                </div>
+
+                <div className="detection-value">
+                  <span>MARINE RISK</span>
+                  <strong>{risk.score} / 100 · {risk.severity}</strong>
                 </div>
 
                 <div className="detection-value">
@@ -223,13 +203,34 @@ export default function Intelligence() {
 
                 <div className="confidence-header">
                   <span>EVIDENCE CONFIDENCE</span>
-                  <strong>78%</strong>
+                  <strong>{risk.confidence.score}%</strong>
                 </div>
 
                 <div className="confidence-track">
                   <div></div>
                 </div>
 
+              </div>
+
+              <div className="evidence-confidence">
+                <div className="confidence-header">
+                  <span>RECOMMENDATION</span>
+                  <strong>{risk.status}</strong>
+                </div>
+                <p>{risk.recommendation}</p>
+              </div>
+
+              <div className="evidence-confidence">
+                <div className="confidence-header">
+                  <span>CONTRIBUTING FACTORS</span>
+                  <strong>{risk.factors.filter((factor) => factor.points > 0).length}</strong>
+                </div>
+                {risk.factors.filter((factor) => factor.points > 0).map((factor) => (
+                  <div className="evidence-row" key={factor.name}>
+                    <span className="evidence-status">·</span>
+                    <span className="evidence-text">{factor.name} · {factor.evidence}</span>
+                  </div>
+                ))}
               </div>
 
             </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
+import { useAppData } from "../state/useAppData";
 import "./Government.css";
 
 const schemes = [
@@ -84,12 +85,9 @@ const questions = [
 ];
 
 export default function Support() {
+  const { state, askWelfare } = useAppData();
   const [selectedScheme, setSelectedScheme] = useState("diesel");
   const [question, setQuestion] = useState("");
-
-  const activeScheme = schemes.find(
-    (scheme) => scheme.id === selectedScheme
-  );
 
   const askQuestion = (text) => {
     const value = text || question;
@@ -97,6 +95,7 @@ export default function Support() {
     if (!value.trim()) return;
 
     setQuestion(value);
+    askWelfare(value);
 
     setTimeout(() => {
       setQuestion("");
@@ -173,11 +172,8 @@ export default function Support() {
                 </div>
 
                 <p>
-                  Based on your profile — registered trawler owner in
-                  Maharashtra with 5 crew — you most likely qualify for three
-                  schemes. PMMSY covers equipment and safety upgrades, the
-                  state diesel subsidy covers fuel, and the fisheries Kisan
-                  Credit Card covers working capital.
+                  {state.welfareResponse?.answer ||
+                    "Based on your profile — registered trawler owner in Maharashtra with 5 crew — you most likely qualify for three schemes. PMMSY covers equipment and safety upgrades, the state diesel subsidy covers fuel, and the fisheries Kisan Credit Card covers working capital."}
                 </p>
 
                 <div className="response-footer">

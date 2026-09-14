@@ -1,3 +1,6 @@
+import { useNavigate } from "react-router-dom";
+import MarineLeafletMap from "../components/MarineLeafletMap";
+import { useAppData } from "../state/useAppData";
 import {
   MapPin,
   Waves,
@@ -15,6 +18,18 @@ import Navbar from "../components/Navbar";
 import "./Dashboard.css";
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const { state, acknowledgeAlert, dismissAlert } = useAppData();
+  const { marine, risk, alerts, dataSources } = state;
+  const activeAlerts = alerts.filter((alert) => ["active", "read"].includes(alert.status));
+
+const safetyStatus =
+  risk.score >= 75
+    ? "SAFE TO SAIL"
+    : risk.score >= 50
+    ? "CAUTION ADVISED"
+    : "HIGH RISK";
+
   return (
     <div className="dashboard-page">
       <Navbar />
@@ -51,21 +66,21 @@ function Dashboard() {
           <WeatherCard
             icon={<Thermometer size={19} />}
             label="SEA TEMPERATURE"
-            value="27.2°C"
+            value={marine.ocean.temperature}
             status="Normal"
           />
 
           <WeatherCard
             icon={<Wind size={19} />}
             label="WIND"
-            value="18 km/h"
+            value={marine.ocean.wind}
             status="SW · Moderate"
           />
 
           <WeatherCard
             icon={<Waves size={19} />}
             label="WAVE HEIGHT"
-            value="1.9 m"
+            value={marine.ocean.waveHeight}
             status="Moderate"
           />
 
@@ -76,16 +91,23 @@ function Dashboard() {
             </div>
 
             <div className="safety-score">
-              82<span>/100</span>
-            </div>
+  {risk.score}<span>/100</span>
+</div>
 
-            <div className="safety-status">
-              <span></span>
-              SAFE TO SAIL
-            </div>
+<div className="safety-status">
+  <span></span>
+  {safetyStatus}
+</div>
           </div>
 
         </section>
+
+        {dataSources.degraded && (
+          <div className="dashboard-degraded-state" role="status">
+            <AlertTriangle size={14} />
+            <span>{dataSources.message} Recommendations use reduced confidence.</span>
+          </div>
+        )}
 
 
         {/* Main dashboard */}
@@ -104,63 +126,25 @@ function Dashboard() {
                 <h2>Current ocean conditions</h2>
               </div>
 
-              <button className="panel-button">
-                Open map
-                <ArrowRight size={13} />
-              </button>
-            </div>
-
-            <div className="dashboard-map">
-
-              <div className="ocean-grid"></div>
-
-              <div className="map-sea-label">
-                ARABIAN SEA
-              </div>
-
-              <div className="map-india-label">
-                INDIA
-              </div>
-
-              {/* User location */}
-              <div className="dashboard-user-marker">
-                <span></span>
-              </div>
-
-              {/* Fishing zone */}
-              <div className="fishing-zone-marker zone-one">
-                <Fish size={13} />
-              </div>
-
-              <div className="fishing-zone-marker zone-two">
-                <Fish size={13} />
-              </div>
-
-              {/* Route */}
-              <div className="dashboard-route"></div>
-
-              <div className="route-start">YOU</div>
-              <div className="route-end">ZONE A</div>
-
-              {/* Map legend */}
-              <div className="map-legend">
-                <div>
-                  <span className="legend-dot safe"></span>
-                  Safe
-                </div>
-
-                <div>
-                  <span className="legend-dot fishing"></span>
-                  Fishing zone
-                </div>
-
-                <div>
-                  <span className="legend-dot warning"></span>
-                  Hazard
-                </div>
-              </div>
+               <button
+  className="panel-button"
+  onClick={() => navigate("/map")}
+>
+  Open map
+  <ArrowRight size={13} />
+</button>
 
             </div>
+
+           <div className="dashboard-map">
+  <MarineLeafletMap
+    fishing={true}
+    vesselsVisible={true}
+    hazardsVisible={true}
+    ocean={true}
+    route={true}
+  />
+</div>
 
           </div>
 
@@ -178,35 +162,31 @@ function Dashboard() {
                 <h2>Things you should know</h2>
               </div>
 
-              <span className="alert-count">2</span>
+              <span className="alert-count">{activeAlerts.length}</span>
             </div>
 
 
-            <AlertItem
-              type="warning"
-              title="Moderate wave conditions"
-              description="Wave height may reach 2.3 m along your route."
-              time="Updated 18 min ago"
-            />
+            {activeAlerts.slice(0, 3).map((alert) => (
+  <AlertItem
+    key={alert.id}
+    type={alert.severity === "CRITICAL" ? "danger" : alert.severity === "CAUTION" ? "warning" : alert.severity.toLowerCase()}
+    title={alert.title}
+    description={alert.message}
+    time={`${alert.severity} · ${alert.timestamp}`}
+    onViewMap={() => navigate(alert.mapPath)}
+    onAcknowledge={() => acknowledgeAlert(alert.id)}
+    onDismiss={() => dismissAlert(alert.id)}
+  />
+))}
 
-            <AlertItem
-              type="danger"
-              title="Vessel activity nearby"
-              description="High vessel density detected 12 km northeast."
-              time="Updated 31 min ago"
-            />
+            <button
+  className="view-alerts"
+  onClick={() => navigate("/alerts")}
+>
+  View all alerts
+  <ArrowRight size={13} />
+</button>
 
-            <AlertItem
-              type="safe"
-              title="No cyclone threat"
-              description="No significant cyclone activity in your area."
-              time="Updated 42 min ago"
-            />
-
-            <button className="view-alerts">
-              View all alerts
-              <ArrowRight size={13} />
-            </button>
 
           </div>
 
@@ -252,11 +232,13 @@ function Dashboard() {
 
             </div>
 
-            <button className="primary-dashboard-button">
-              View fishing zones
-              <ArrowRight size={14} />
-            </button>
-
+            <button
+  className="primary-dashboard-button"
+  onClick={() => navigate("/fishing-zones")}
+>
+  View fishing zones
+  <ArrowRight size={14} />
+</button>
           </div>
 
 
@@ -289,10 +271,14 @@ function Dashboard() {
 
             </div>
 
-            <button className="secondary-dashboard-button">
-              Open route planner
-              <ArrowRight size={14} />
-            </button>
+            <button
+  className="secondary-dashboard-button"
+  onClick={() => navigate("/routes")}
+>
+  Open route planner
+  <ArrowRight size={14} />
+</button>
+
 
           </div>
 
@@ -332,6 +318,9 @@ function AlertItem({
   title,
   description,
   time,
+  onViewMap,
+  onAcknowledge,
+  onDismiss,
 }) {
   return (
     <div className={`alert-item ${type}`}>
@@ -344,6 +333,11 @@ function AlertItem({
         <strong>{title}</strong>
         <p>{description}</p>
         <small>{time}</small>
+        <div className="dashboard-alert-actions">
+          <button onClick={onViewMap}>View</button>
+          <button onClick={onAcknowledge}>Acknowledge</button>
+          <button onClick={onDismiss}>Dismiss</button>
+        </div>
       </div>
 
     </div>

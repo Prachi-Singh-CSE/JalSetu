@@ -7,7 +7,7 @@ import {
   ChevronDown,
   Route,
 } from "lucide-react";
-
+import MarineLeafletMap from "../components/MarineLeafletMap";
 import Navbar from "../components/Navbar";
 import "./FishingZones.css";
 
@@ -65,38 +65,18 @@ function FishingZones() {
 
             </div>
 
-            <div className="zones-map">
-
-              <div className="map-lines"></div>
-
-              <div className="map-label arabian">
-                ARABIAN SEA
-              </div>
-
-              <div className="map-label india">
-                INDIA
-              </div>
-
-              {/* User location */}
-              <div className="user-marker">
-                <span></span>
-              </div>
-
-              {/* Zone markers */}
-              <div className="zone-marker zone-a">
-                <div className="marker-pulse"></div>
-                A
-              </div>
-
-              <div className="zone-marker zone-b">
-                B
-              </div>
-
-              <div className="zone-marker zone-c">
-                C
-              </div>
-
-            </div>
+<div className="zones-map">
+  <MarineLeafletMap
+    fishing={true}
+    vesselsVisible={false}
+    hazardsVisible={false}
+    ocean={false}
+    imbl={false}
+    route={false}
+    safeOnly={true}
+    highPotentialOnly={true}
+  />
+</div>
 
             <div className="map-footer">
 
