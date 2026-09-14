@@ -924,3 +924,372 @@
     max-width: 260px;
   }
 }
+
+.leaflet-marine-map {
+  width: 100%;
+  height: 100%;
+  min-height: 620px;
+  z-index: 1;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  background: #081b2d;
+}
+
+.custom-map-marker {
+  background: transparent;
+  border: none;
+}
+
+.map-marker-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  background: #0b2337;
+  border: 2px solid #55d6e8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.map-marker-icon.user {
+  border-color: #22d3ee;
+}
+
+.map-marker-icon.fish {
+  border-color: #22c55e;
+}
+
+.map-marker-icon.vessel {
+  border-color: #60a5fa;
+}
+
+.map-marker-icon.hazard {
+  border-color: #f59e0b;
+}
+
+.layers-button-wrapper {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 9999 !important;
+}
+.layers-button {
+  position: relative !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+}
+.map-layer-menu {
+  position: absolute !important;
+  top: calc(100% + 7px) !important;
+  right: 0 !important;
+  left: auto !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+
+  width: 180px !important;
+  min-width: 180px !important;
+  box-sizing: border-box !important;
+
+  padding: 10px !important;
+
+  background: #0b2337 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+.map-layer-menu label {
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+
+  color: #d7e7ef !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+}
+
+.map-layer-menu input {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0b2337;
+  color: #d7e7ef;
+  border-radius: 9px;
+}
+
+.leaflet-popup-tip {
+  background: #0b2337;
+}
+
+.leaflet-popup-content {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.leaflet-control-zoom {
+  display: none;
+}
+
+.map-controls {
+  position: absolute;
+  left: 16px;
+  bottom: 160px;
+  z-index: 1000;
+}
+
+.map-controls button {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pfz-popup {
+  min-width: 190px;
+}
+
+.pfz-popup strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: #f4fbff;
+}
+
+.pfz-score {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: rgba(34, 197, 94, 0.08);
+  border-radius: 7px;
+}
+
+.pfz-score span {
+  font-size: 11px;
+  color: #9bb4c2;
+}
+
+.pfz-score b {
+  font-size: 15px;
+  color: #22c55e;
+}
+
+.pfz-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: #a9c1cc;
+  margin-bottom: 12px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.pfz-details-button {
+  width: 100%;
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 10px;
+  background: #55d6e8;
+  color: #061723;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pfz-details-button:hover {
+  opacity: 0.9;
+}
+
+
+.risk-popup {
+  min-width: 200px;
+}
+
+.risk-popup strong {
+  display: block;
+  font-size: 15px;
+  color: #f4fbff;
+  margin-bottom: 12px;
+}
+
+.risk-score-large {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 10px;
+  margin-bottom: 9px;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 7px;
+}
+
+.risk-score-large span {
+  font-size: 11px;
+  color: #9bb4c2;
+}
+
+.risk-score-large b {
+  font-size: 18px;
+  color: #f59e0b;
+}
+
+.risk-level {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: #fbbf24;
+  margin-bottom: 12px;
+}
+
+.risk-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+.risk-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.risk-factors div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.risk-factors span {
+  font-size: 10px;
+  color: #8fa9b7;
+}
+
+.risk-factors b {
+  font-size: 10px;
+  color: #d7e7ef;
+}
+
+.risk-note {
+  margin: 12px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #9bb4c2;
+}
+
+
+.imbl-popup {
+  min-width: 205px;
+}
+
+.imbl-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.imbl-popup-header strong {
+  font-size: 15px;
+  color: #f4fbff;
+}
+
+.imbl-warning-icon {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  font-size: 13px;
+}
+
+.imbl-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 10px;
+  margin-bottom: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 7px;
+}
+
+.imbl-alert span {
+  font-size: 10px;
+  color: #d7e7ef;
+}
+
+.imbl-alert b {
+  font-size: 9px;
+  color: #ef4444;
+}
+
+.imbl-popup p {
+  margin: 0 0 12px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #9bb4c2;
+}
+
+.imbl-distance {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 10px;
+}
+
+.imbl-distance span {
+  font-size: 10px;
+  color: #8fa9b7;
+}
+
+.imbl-distance b {
+  font-size: 10px;
+  color: #fbbf24;
+}
+
+.imbl-escalate-button {
+  width: 100%;
+  border: 0;
+  border-radius: 7px;
+  padding: 8px 10px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.imbl-escalate-button:hover {
+  opacity: 0.9;
+}

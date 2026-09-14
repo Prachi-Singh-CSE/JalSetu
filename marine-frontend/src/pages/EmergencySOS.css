@@ -151,6 +151,18 @@
   line-height: 1.5;
 }
 
+.sos-confirmation-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 23px;
+}
+
+.sos-confirmation-actions .sos-trigger,
+.sos-confirmation-actions .sos-reset-btn {
+  margin-top: 0;
+}
+
 .sos-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

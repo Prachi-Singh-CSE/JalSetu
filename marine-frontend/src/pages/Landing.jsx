@@ -9,9 +9,12 @@ import {
   Database,
   Map,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./Landing.css";
 
 function Landing() {
+  const navigate = useNavigate();
+
   return (
     <div className="landing-page">
 
@@ -80,9 +83,7 @@ function Landing() {
 
             <button
               className="primary-button"
-              onClick={() => {
-                window.location.href = "/dashboard";
-              }}
+              onClick={() => navigate("/dashboard")}
             >
               <ArrowRight size={17} />
               Login / Continue as Fisherman
@@ -90,9 +91,7 @@ function Landing() {
 
             <button
               className="secondary-button"
-              onClick={() => {
-                window.location.href = "/ai-assistant";
-              }}
+              onClick={() => navigate("/ai-assistant")}
             >
               <Bot size={17} />
               Ask the Marine AI

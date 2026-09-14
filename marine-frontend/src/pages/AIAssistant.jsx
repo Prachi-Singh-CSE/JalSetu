@@ -1,22 +1,25 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Sparkles,
   Send,
   ChevronDown,
   Database,
   UserRound,
-  MapPin,
-  Bell,
-  Shield,
 } from "lucide-react";
 
 import Navbar from "../components/Navbar";
+import { useAppData } from "../state/useAppData";
 import "./AIAssistant.css";
 
 export default function AIAssistant() {
   const [reasoning1, setReasoning1] = useState(false);
   const [reasoning2, setReasoning2] = useState(false);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { state, askQuestion } = useAppData();
 
   const quickPrompts = [
     "Can I go fishing today?",
@@ -30,6 +33,26 @@ export default function AIAssistant() {
     "Is there any oil spill near my route?",
     "What should I do if I am in danger?",
   ];
+
+  const submitMessage = (value) => {
+    const question = value.trim();
+
+    if (!question) return;
+
+    setError("");
+    setLoading(true);
+    setMessage("");
+
+    window.setTimeout(() => {
+      try {
+        askQuestion(question);
+      } catch {
+        setError("The demo reasoning service is unavailable. Try again.");
+      } finally {
+        setLoading(false);
+      }
+    }, 180);
+  };
 
   return (
     <div className="ai-page">
@@ -86,10 +109,9 @@ export default function AIAssistant() {
 
                   <p>
                     Conditions near your current location are currently
-                    <strong> HIGH RISK.</strong> Wave height is 2.8 m and
-                    winds are reaching 34 km/h. A severe-weather zone is
-                    also nearby, 84 km north-east. I would not recommend
-                    going out before tomorrow morning.
+                    <strong> {state.risk.status}.</strong> Wave height is {state.marine.ocean.waveHeight}
+                    and wind is {state.marine.ocean.wind}. A nearby hazard is
+                    present on the current route. {state.risk.recommendation}
                   </p>
 
                   <div className="message-sources">
@@ -101,9 +123,7 @@ export default function AIAssistant() {
                     <span>IMD</span>
                     <span>GPS</span>
 
-                    <small>
-                      Confidence 92% · 14:24 IST
-                    </small>
+                    <small>Confidence {state.risk.confidence.level} · {state.risk.confidence.score}% · Demo data</small>
                   </div>
 
                 </div>
@@ -120,9 +140,9 @@ export default function AIAssistant() {
               {/* SUGGESTIONS */}
 
               <div className="suggestion-row">
-                <button>What about tomorrow?</button>
-                <button>Explain my risk score</button>
-                <button>Find safe harbour</button>
+                <button onClick={() => submitMessage("What about tomorrow?")}>What about tomorrow?</button>
+                <button onClick={() => submitMessage("Explain my risk score")}>Explain my risk score</button>
+                <button onClick={() => submitMessage("Find safe harbour")}>Find safe harbour</button>
               </div>
 
               {/* USER 2 */}
@@ -144,11 +164,9 @@ export default function AIAssistant() {
                 <div className="ai-message">
 
                   <p>
-                    Your score is <strong>76 / 100</strong>. Wave height
-                    contributes the most (28 points), then cyclone proximity
-                    (22), wind (14), nearby hazards (8) and IMBL proximity
-                    (4). Lightning adds nothing right now. Anything above
-                    70 is HIGH RISK for your vessel class.
+                    Your score is <strong>{state.risk.score} / 100</strong>.
+                    {state.risk.factors.filter((factor) => factor.points > 0).map((factor) => ` ${factor.name} contributes ${factor.points} points.`)}
+                    {" "}{state.risk.status} for the current demo conditions.
                   </p>
 
                   <div className="message-sources">
@@ -161,9 +179,7 @@ export default function AIAssistant() {
                     <span>OCEAN MODEL</span>
                     <span>GPS</span>
 
-                    <small>
-                      Confidence 92% · Just now
-                    </small>
+                    <small>Confidence {state.risk.confidence.level} · {state.risk.confidence.score}% · Demo data</small>
                   </div>
 
                 </div>
@@ -180,9 +196,34 @@ export default function AIAssistant() {
               {/* SUGGESTIONS 2 */}
 
               <div className="suggestion-row">
-                <button>What about tomorrow?</button>
-                <button>View Safer Route</button>
+                <button onClick={() => submitMessage("What about tomorrow?")}>What about tomorrow?</button>
+                <button onClick={() => submitMessage("View safer route")}>View Safer Route</button>
               </div>
+
+              {state.chat.filter((item) => item.question).map((item) => (
+                <div className="message-row ai-row" key={item.id}>
+                  <div className="ai-message">
+                    <p><strong>{item.question}</strong><br />{item.answer}</p>
+                    <StructuredResponse response={item} onNavigate={navigate} />
+                    <div className="message-sources">
+                      {item.sources.map((source) => <span key={source}>{source}</span>)}
+                      <small>Confidence {item.confidence.level} · {item.confidence.score}% · Demo response</small>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {loading && (
+                <div className="reasoning-details">
+                  Reading marine conditions and preparing a demo assessment...
+                </div>
+              )}
+
+              {error && (
+                <div className="reasoning-details">
+                  {error}
+                </div>
+              )}
 
             </div>
 
@@ -198,14 +239,14 @@ export default function AIAssistant() {
                   placeholder="Ask anything about your waters..."
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && message.trim()) {
-                      setMessage("");
+                      submitMessage(message);
                     }
                   }}
                 />
 
                 <button
                   className="send-button"
-                  onClick={() => setMessage("")}
+                  onClick={() => submitMessage(message)}
                 >
                   <Send size={13} />
                   Send
@@ -235,7 +276,7 @@ export default function AIAssistant() {
               <div className="prompt-list">
 
                 {quickPrompts.map((prompt) => (
-                  <button key={prompt}>
+                  <button key={prompt} onClick={() => submitMessage(prompt)}>
                     {prompt}
                   </button>
                 ))}
@@ -259,7 +300,7 @@ export default function AIAssistant() {
 
                 <ContextItem
                   label="Risk score"
-                  value="76 / 100 · HIGH"
+                  value={`${state.risk.score} / 100 · ${state.risk.severity}`}
                   danger
                 />
 
@@ -355,6 +396,46 @@ function ReasoningBar({ open, setOpen }) {
         </div>
       )}
 
+    </div>
+  );
+}
+
+function StructuredResponse({ response, onNavigate }) {
+  return (
+    <div className="reasoning-details">
+      <div>
+        <span>Risk</span>
+        <strong>{response.risk.severity} · {response.risk.score}/100</strong>
+      </div>
+
+      <div>
+        <span>Confidence</span>
+        <strong>{response.confidence.level} · {response.confidence.score}%</strong>
+      </div>
+
+      <p>Why:</p>
+      {response.factors
+        .filter((factor) => factor.points > 0)
+        .map((factor) => (
+          <div key={factor.name}>
+            <span>{factor.name}</span>
+            <strong>{factor.evidence}</strong>
+          </div>
+        ))}
+
+      <p>Recommendation: {response.recommendation}</p>
+
+      {response.warnings.map((warning) => (
+        <p key={warning}>Warning: {warning}</p>
+      ))}
+
+      <div className="suggestion-row">
+        {response.actions.map((item) => (
+          <button key={item.to} onClick={() => onNavigate(item.to)}>
+            {item.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

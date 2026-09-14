@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AppDataProvider } from "./state/AppDataProvider";
+import FloatingSOS from "./components/FloatingSOS";
 
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -12,11 +14,13 @@ import Government from "./pages/Government";
 import Profile from "./pages/Profile";
 import Map from "./pages/Map";
 import EmergencySOS from "./pages/EmergencySOS";
+import AuthorityDashboard from "./pages/AuthorityDashboard";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <AppDataProvider>
+      <BrowserRouter>
+        <Routes>
 
         {/* Landing */}
         <Route path="/" element={<Landing />} />
@@ -33,9 +37,12 @@ function App() {
         <Route path="/intelligence" element={<Intelligence />} />
         <Route path="/government" element={<Government />} />
         <Route path="/profile" element={<Profile />} />
-
-      </Routes>
-    </BrowserRouter>
+        <Route path="/authority" element={<AuthorityDashboard />} />
+        
+        </Routes>
+        <FloatingSOS />
+      </BrowserRouter>
+    </AppDataProvider>
   );
 }
 
