@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import MarineLeafletMap from "../components/MarineLeafletMap";
 import { useAppData } from "../state/useAppData";
@@ -19,16 +20,110 @@ import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { state, acknowledgeAlert, dismissAlert } = useAppData();
-  const { marine, risk, alerts, dataSources } = state;
-  const activeAlerts = alerts.filter((alert) => ["active", "read"].includes(alert.status));
 
-const safetyStatus =
-  risk.score >= 75
-    ? "SAFE TO SAIL"
-    : risk.score >= 50
+  const {
+    state,
+    acknowledgeAlert,
+    dismissAlert,
+  } = useAppData();
+
+  const {
+  marine,
+  risk,
+  alerts,
+  dataSources,
+  routes,
+  selectedRouteId,
+} = state;
+
+  /*
+   * Use the shared proactive alerts from AppDataContext.
+   *
+   * Only alerts that are currently active and not acknowledged
+   * are shown in the Dashboard ACTIVE ALERTS panel.
+   */
+  const activeAlerts = alerts
+    .filter(
+      (alert) =>
+        alert.status === "active" &&
+        !alert.acknowledged
+    )
+    .sort((a, b) => {
+      const priority = {
+        SEVERE: 4,
+        WARNING: 3,
+        CAUTION: 2,
+        INFO: 1,
+      };
+
+      return (
+        (priority[b.severity] || 0) -
+        (priority[a.severity] || 0)
+      );
+    });
+
+    const routeList = Array.isArray(routes)
+  ? routes
+  : routes?.options || [];
+
+const selectedRoute =
+  routeList.find((route) => route.id === selectedRouteId) ||
+  routeList.find((route) => route.id === "safer") ||
+  null;
+
+const routeConfidence = risk?.confidence?.score ?? 0;
+
+const riskLabel =
+  risk?.severity ||
+  (risk?.score >= 75
+    ? "SEVERE"
+    : risk?.score >= 50
+    ? "HIGH"
+    : risk?.score >= 25
+    ? "MODERATE"
+    : "LOW");
+
+  const safetyStatus =
+  riskLabel === "SEVERE"
+    ? "HIGH RISK"
+    : riskLabel === "HIGH"
     ? "CAUTION ADVISED"
-    : "HIGH RISK";
+    : riskLabel === "MODERATE"
+    ? "CAUTION ADVISED"
+    : "SAFE TO SAIL";
+
+  /*
+   * Decide where the alert's existing View button should go.
+   *
+   * Marine alerts:
+   *   -> use their existing mapPath
+   *
+   * Data-source alerts:
+   *   -> open Intelligence because they affect
+   *      confidence/risk rather than a physical map location.
+   */
+  const getAlertAction = (alert) => {
+    if (
+      alert.type === "DATA_SOURCE_UNAVAILABLE" ||
+      alert.type === "DATA_SOURCE_STALE"
+    ) {
+      return {
+        label: "View Risk",
+        path: "/intelligence",
+      };
+    }
+
+    return {
+      label: "View",
+      path: alert.mapPath || "/map",
+    };
+  };
+
+  const handleAlertAction = (alert) => {
+    const action = getAlertAction(alert);
+
+    navigate(action.path);
+  };
 
   return (
     <div className="dashboard-page">
@@ -52,9 +147,13 @@ const safetyStatus =
 
           <div className="dashboard-location">
             <MapPin size={16} />
+
             <div>
               <span>YOUR LOCATION</span>
-              <strong>Arabian Sea · Sector AR-14</strong>
+
+              <strong>
+                Arabian Sea · Sector AR-14
+              </strong>
             </div>
           </div>
         </section>
@@ -85,30 +184,90 @@ const safetyStatus =
           />
 
           <div className="safety-card">
+
             <div className="safety-top">
               <span>SAFETY SCORE</span>
               <ShieldCheck size={19} />
             </div>
 
             <div className="safety-score">
-  {risk.score}<span>/100</span>
-</div>
+              {risk.score}
+              <span>/100</span>
+            </div>
 
-<div className="safety-status">
-  <span></span>
-  {safetyStatus}
-</div>
+            <div className="safety-status">
+              <span></span>
+              {safetyStatus}
+            </div>
+
           </div>
 
         </section>
 
+
+        {/* Degraded data state */}
         {dataSources.degraded && (
-          <div className="dashboard-degraded-state" role="status">
+          <div
+            className="dashboard-degraded-state"
+            role="status"
+          >
             <AlertTriangle size={14} />
-            <span>{dataSources.message} Recommendations use reduced confidence.</span>
+
+            <span>
+              {dataSources.message}
+              {" "}
+              Recommendations use reduced confidence.
+            </span>
           </div>
         )}
 
+{/* Data source health */}
+<section className="dashboard-panel data-health-panel">
+  <div className="panel-header">
+    <div>
+      <div className="panel-label">
+        <ShieldCheck size={13} />
+        DATA SOURCE HEALTH
+      </div>
+
+      <h2>
+        {dataSources.confidenceLevel} confidence ·{" "}
+        {dataSources.healthy}/{dataSources.total} available
+      </h2>
+    </div>
+
+    <span
+      className={`data-health-status ${
+        dataSources.degraded ? "degraded" : "healthy"
+      }`}
+    >
+      {dataSources.degraded ? "DEGRADED" : "AVAILABLE"}
+    </span>
+  </div>
+
+  <div className="data-health-list">
+    {dataSources.sources.map((source) => (
+      <div className="data-health-row" key={source.id}>
+        <div className="data-health-name">
+          <span
+            className={`source-status-dot ${source.status.toLowerCase()}`}
+          />
+          <span>{source.name}</span>
+        </div>
+
+        <span
+          className={`source-status ${source.status.toLowerCase()}`}
+        >
+          {source.status}
+        </span>
+
+        <span className="data-health-time">
+          {source.lastUpdated}
+        </span>
+      </div>
+    ))}
+  </div>
+</section>
 
         {/* Main dashboard */}
         <section className="dashboard-grid">
@@ -117,34 +276,37 @@ const safetyStatus =
           <div className="dashboard-panel map-panel">
 
             <div className="panel-header">
+
               <div>
                 <div className="panel-label">
                   <Navigation size={13} />
                   MARINE MAP
                 </div>
 
-                <h2>Current ocean conditions</h2>
+                <h2>
+                  Current ocean conditions
+                </h2>
               </div>
 
-               <button
-  className="panel-button"
-  onClick={() => navigate("/map")}
->
-  Open map
-  <ArrowRight size={13} />
-</button>
+              <button
+                className="panel-button"
+                onClick={() => navigate("/map")}
+              >
+                Open map
+                <ArrowRight size={13} />
+              </button>
 
             </div>
 
-           <div className="dashboard-map">
-  <MarineLeafletMap
-    fishing={true}
-    vesselsVisible={true}
-    hazardsVisible={true}
-    ocean={true}
-    route={true}
-  />
-</div>
+            <div className="dashboard-map">
+              <MarineLeafletMap
+                fishing={true}
+                vesselsVisible={true}
+                hazardsVisible={true}
+                ocean={true}
+                route={true}
+              />
+            </div>
 
           </div>
 
@@ -153,40 +315,91 @@ const safetyStatus =
           <div className="dashboard-panel alerts-panel">
 
             <div className="panel-header">
+
               <div>
                 <div className="panel-label">
                   <AlertTriangle size={13} />
                   ACTIVE ALERTS
                 </div>
 
-                <h2>Things you should know</h2>
+                <h2>
+                  Things you should know
+                </h2>
               </div>
 
-              <span className="alert-count">{activeAlerts.length}</span>
+              <span className="alert-count">
+                {activeAlerts.length}
+              </span>
+
             </div>
 
 
-            {activeAlerts.slice(0, 3).map((alert) => (
-  <AlertItem
-    key={alert.id}
-    type={alert.severity === "CRITICAL" ? "danger" : alert.severity === "CAUTION" ? "warning" : alert.severity.toLowerCase()}
-    title={alert.title}
-    description={alert.message}
-    time={`${alert.severity} · ${alert.timestamp}`}
-    onViewMap={() => navigate(alert.mapPath)}
-    onAcknowledge={() => acknowledgeAlert(alert.id)}
-    onDismiss={() => dismissAlert(alert.id)}
-  />
-))}
+            {activeAlerts.length > 0 ? (
+
+              activeAlerts
+                .slice(0, 3)
+                .map((alert) => {
+
+                  const action =
+                    getAlertAction(alert);
+
+                  return (
+                    <AlertItem
+                      key={alert.id}
+
+                      type={
+                        alert.severity === "SEVERE"
+                          ? "danger"
+                          : alert.severity === "WARNING"
+                          ? "warning"
+                          : "caution"
+                      }
+
+                      title={alert.title}
+
+                      description={alert.message}
+
+                      time={
+                        `${alert.severity} · ${alert.timestamp}`
+                      }
+
+                      onViewMap={() =>
+                        handleAlertAction(alert)
+                      }
+
+                      onAcknowledge={() =>
+                        acknowledgeAlert(alert.id)
+                      }
+
+                      onDismiss={() =>
+                        dismissAlert(alert.id)
+                      }
+
+                      actionLabel={action.label}
+                    />
+                  );
+                })
+
+            ) : (
+
+              <div className="dashboard-alert-empty">
+                <ShieldCheck size={17} />
+
+                <span>
+                  No active alerts right now.
+                </span>
+              </div>
+
+            )}
+
 
             <button
-  className="view-alerts"
-  onClick={() => navigate("/alerts")}
->
-  View all alerts
-  <ArrowRight size={13} />
-</button>
-
+              className="view-alerts"
+              onClick={() => navigate("/alerts")}
+            >
+              View all alerts
+              <ArrowRight size={13} />
+            </button>
 
           </div>
 
@@ -227,18 +440,19 @@ const safetyStatus =
 
               <div>
                 <span>CONFIDENCE</span>
-                <strong>91%</strong>
+                <strong>{routeConfidence}%</strong>
               </div>
 
             </div>
 
             <button
-  className="primary-dashboard-button"
-  onClick={() => navigate("/fishing-zones")}
->
-  View fishing zones
-  <ArrowRight size={14} />
-</button>
+              className="primary-dashboard-button"
+              onClick={() => navigate("/fishing-zones")}
+            >
+              View fishing zones
+              <ArrowRight size={14} />
+            </button>
+
           </div>
 
 
@@ -249,50 +463,66 @@ const safetyStatus =
               RECOMMENDED ROUTE
             </div>
 
-            <h2>Safest route to Zone A</h2>
+            <h2>
+  {selectedRoute?.name || "Safest route to Zone A"}
+</h2>
 
             <div className="route-info">
 
               <div className="route-stat">
                 <Clock size={15} />
+
                 <div>
                   <span>EST. TIME</span>
-                  <strong>1h 12m</strong>
+                  <strong>{selectedRoute?.estimatedTime || "—"}</strong>
                 </div>
               </div>
 
+
               <div className="route-stat">
                 <Navigation size={15} />
+
                 <div>
                   <span>DISTANCE</span>
-                  <strong>18.4 km</strong>
+                  <strong>
+  {selectedRoute?.distanceKm != null
+    ? `${selectedRoute.distanceKm} km`
+    : "—"}
+</strong>
                 </div>
               </div>
 
             </div>
 
             <button
-  className="secondary-dashboard-button"
-  onClick={() => navigate("/routes")}
->
-  Open route planner
-  <ArrowRight size={14} />
-</button>
-
+              className="secondary-dashboard-button"
+              onClick={() => navigate("/routes")}
+            >
+              Open route planner
+              <ArrowRight size={14} />
+            </button>
 
           </div>
 
         </section>
 
       </main>
+
     </div>
   );
 }
 
 
-/* Weather card */
+/* ============================================================
+   WEATHER CARD
+============================================================ */
 
-function WeatherCard({ icon, label, value, status }) {
+function WeatherCard({
+  icon,
+  label,
+  value,
+  status,
+}) {
   return (
     <div className="weather-card">
 
@@ -301,9 +531,13 @@ function WeatherCard({ icon, label, value, status }) {
       </div>
 
       <div className="weather-info">
+
         <span>{label}</span>
+
         <strong>{value}</strong>
+
         <small>{status}</small>
+
       </div>
 
     </div>
@@ -311,7 +545,9 @@ function WeatherCard({ icon, label, value, status }) {
 }
 
 
-/* Alert */
+/* ============================================================
+   ALERT
+============================================================ */
 
 function AlertItem({
   type,
@@ -321,6 +557,7 @@ function AlertItem({
   onViewMap,
   onAcknowledge,
   onDismiss,
+  actionLabel = "View",
 }) {
   return (
     <div className={`alert-item ${type}`}>
@@ -330,14 +567,44 @@ function AlertItem({
       </div>
 
       <div className="alert-text">
-        <strong>{title}</strong>
-        <p>{description}</p>
-        <small>{time}</small>
+
+        <strong>
+          {title}
+        </strong>
+
+        <p>
+          {description}
+        </p>
+
+        <small>
+          {time}
+        </small>
+
         <div className="dashboard-alert-actions">
-          <button onClick={onViewMap}>View</button>
-          <button onClick={onAcknowledge}>Acknowledge</button>
-          <button onClick={onDismiss}>Dismiss</button>
+
+          <button
+            type="button"
+            onClick={onViewMap}
+          >
+            {actionLabel}
+          </button>
+
+          <button
+            type="button"
+            onClick={onAcknowledge}
+          >
+            Acknowledge
+          </button>
+
+          <button
+            type="button"
+            onClick={onDismiss}
+          >
+            Dismiss
+          </button>
+
         </div>
+
       </div>
 
     </div>

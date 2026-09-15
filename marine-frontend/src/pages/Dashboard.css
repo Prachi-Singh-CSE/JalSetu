@@ -811,6 +811,10 @@
 @media (max-width: 1100px) {
   .situation-grid {
     grid-template-columns: repeat(2, 1fr);
+
+      .data-health-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
   }
 
   .dashboard-grid,
@@ -826,6 +830,18 @@
 @media (max-width: 650px) {
   .dashboard-content {
     padding: 20px 14px;
+
+    .data-health-row {
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  .data-health-time {
+    grid-column: 1 / 2;
+    text-align: left;
+    margin-top: -8px;
+    margin-left: 15px;
+  }
   }
 
   .dashboard-header {
@@ -899,5 +915,174 @@
   height: 1px;
   background: #e5e7eb;
 }
+/* ============================================================
+   DATA SOURCE HEALTH
+   Matches existing Samudra dashboard panels
+============================================================ */
 
+.data-health-panel {
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.data-health-panel .panel-header {
+  padding-bottom: 14px;
+}
+
+/* Status badge */
+.data-health-status {
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  line-height: 1;
+}
+
+.data-health-status.healthy {
+  border: 1px solid #245b4f;
+  background: #0b302b;
+  color: #1bc89d;
+}
+
+.data-health-status.degraded {
+  border: 1px solid #765d3b;
+  background: #171d22;
+  color: #d5ad70;
+}
+
+/* Source list */
+.data-health-list {
+  width: 100%;
+  border-top: 1px solid #203847;
+}
+
+/* Individual source row */
+.data-health-row {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 17px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 85px;
+  align-items: center;
+  gap: 12px;
+
+  box-sizing: border-box;
+  border-bottom: 1px solid #172f3e;
+}
+
+.data-health-row:last-child {
+  border-bottom: none;
+}
+
+/* Source name */
+.data-health-name {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.data-health-name > span:last-child {
+  display: block;
+  min-width: 0;
+
+  color: #dce7ec;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Status dot */
+.source-status-dot {
+  width: 7px;
+  height: 7px;
+  min-width: 7px;
+  display: inline-block;
+
+  border-radius: 50%;
+}
+
+/* Status colours */
+.source-status-dot.cached {
+  background: #20c5df;
+}
+
+.source-status-dot.live {
+  background: #1bc89d;
+}
+
+.source-status-dot.stale {
+  background: #e9aa38;
+}
+
+.source-status-dot.unavailable {
+  background: #ef6868;
+}
+
+/* CACHED / STALE / UNAVAILABLE */
+.source-status {
+  display: block;
+
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  line-height: 1;
+}
+
+.source-status.cached {
+  color: #20c5df;
+}
+
+.source-status.live {
+  color: #1bc89d;
+}
+
+.source-status.stale {
+  color: #e9aa38;
+}
+
+.source-status.unavailable {
+  color: #ef6868;
+}
+
+/* Last updated */
+.data-health-time {
+  display: block;
+
+  color: #506b7b;
+  font-size: 7px;
+  font-weight: 500;
+  line-height: 1;
+
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   DATA SOURCE HEALTH — RESPONSIVE
+============================================================ */
+
+@media (max-width: 650px) {
+  .data-health-row {
+    min-height: 46px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 10px;
+    padding: 7px 14px;
+  }
+
+  .source-status {
+    text-align: right;
+  }
+
+  .data-health-time {
+    grid-column: 1 / -1;
+    margin-left: 15px;
+    margin-top: -4px;
+
+    text-align: left;
+  }
+}
 }
