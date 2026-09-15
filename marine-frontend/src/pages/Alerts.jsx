@@ -18,7 +18,7 @@ import "./Alerts.css";
 
 export default function Alerts() {
   const navigate = useNavigate();
-  const { state, acknowledgeAlert, markAlertRead, dismissAlert, selectRoute } = useAppData();
+  const { state, acknowledgeAlert, markAlertRead, dismissAlert, selectRoute, replayHazardPush } = useAppData();
   const { imbl } = state;
   const [filter, setFilter] = useState("All");
   const [replayed, setReplayed] = useState(false);
@@ -54,7 +54,14 @@ export default function Alerts() {
             </div>
           )}
 
-          <button className="replay-alert" onClick={() => setReplayed(true)}>
+          <button
+            className="replay-alert"
+            onClick={() => {
+              replayHazardPush();
+              setReplayed(true);
+              navigate("/dashboard");
+            }}
+          >
             <Bell size={15} />
             {replayed ? "Hazard alert replayed" : "Replay hazard push alert"}
           </button>

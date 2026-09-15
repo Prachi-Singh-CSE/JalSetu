@@ -17,6 +17,7 @@ import {
   answerWelfareQuestion,
 } from "../services";
 import { AppDataContext } from "./AppDataContext";
+import { useLanguage } from "./useLanguage";
 
 function createInitialState() {
   const marine = getMarineSnapshot();
@@ -43,6 +44,19 @@ function createInitialState() {
     chat: getInitialChat({ risk, marineData: marine, dataSourceHealth: dataSources }),
     sos: getSOSDetails(),
     welfare: getWelfareSchemes(),
+    // Multi-turn history for the Welfare Scheme Assistant, mirroring `chat`
+    // above so both screens can share the ChatWindow component. Seeded with
+    // the same placeholder used previously as Government.jsx's static
+    // fallback answer.
+    welfareChat: [
+      {
+        id: "welfare-seed",
+        answer:
+          "Based on your profile — registered trawler owner in Maharashtra with 5 crew — you most likely qualify for three schemes. PMMSY covers equipment and safety upgrades, the state diesel subsidy covers fuel, and the fisheries Kisan Credit Card covers working capital.",
+        sources: ["GPS"],
+        confidence: { level: "Moderate", score: 86 },
+      },
+    ],
     dataSources,
     lastDemoSOS: null,
     sosEvents: [],
@@ -140,14 +154,44 @@ function appDataReducer(state, action) {
       };
     case "update-location":
       return { ...state, location: action.location };
+    case "replay-hazard-push":
+      // Demo-only: simulates a fresh unsolicited push by marking active
+      // hazard-type alerts unread again so the proactive banner re-appears,
+      // without touching alerts the user has already dismissed for good.
+      return {
+        ...state,
+        alerts: state.alerts.map((alert) =>
+          alert.status === "dismissed" ? alert : { ...alert, read: false, status: "active" }
+        ),
+      };
     case "answer-welfare":
       return { ...state, welfareResponse: answerWelfareQuestion(action.question) };
+    case "append-welfare-chat":
+      {
+        // answerWelfareQuestion's return shape is defined elsewhere in the
+        // service layer; normalize defensively so a missing field never
+        // breaks the shared ChatWindow's rendering.
+        const response = answerWelfareQuestion(action.question) || {};
+        const turn = {
+          id: `welfare-${Date.now()}`,
+          question: action.question,
+          answer: response.answer || "",
+          sources: response.sources || ["GPS"],
+          confidence: response.confidence || { level: "Moderate", score: 86 },
+        };
+        return {
+          ...state,
+          welfareResponse: response, // kept for any other existing consumer
+          welfareChat: [...state.welfareChat, turn],
+        };
+      }
     default:
       return state;
   }
 }
 
 export function AppDataProvider({ children }) {
+  const { language } = useLanguage();
   const [state, dispatch] = useReducer(appDataReducer, undefined, createInitialState);
 
   const acknowledgeAlert = (alertId) =>
@@ -164,6 +208,7 @@ export function AppDataProvider({ children }) {
         marineData: state.marine,
         dataSourceHealth: state.dataSources,
         previousMessages: state.chat,
+        language,
       }),
     });
   const selectRoute = (routeId, reason) =>
@@ -179,11 +224,12 @@ export function AppDataProvider({ children }) {
     (location) => dispatch({ type: "update-location", location }),
     []
   );
+  const replayHazardPush = useCallback(() => dispatch({ type: "replay-hazard-push" }), []);
   const askWelfare = (question) =>
-    dispatch({ type: "answer-welfare", question });
+    dispatch({ type: "append-welfare-chat", question });
 
   return (
-    <AppDataContext.Provider value={{ state, acknowledgeAlert, markAlertRead, dismissAlert, recordDemoSOS, askQuestion, selectRoute, updateLocation, dismissIMBL, acknowledgeAuthority, setSourceStatus, askWelfare }}>
+    <AppDataContext.Provider value={{ state, acknowledgeAlert, markAlertRead, dismissAlert, recordDemoSOS, askQuestion, selectRoute, updateLocation, dismissIMBL, acknowledgeAuthority, setSourceStatus, askWelfare, replayHazardPush }}>
       {children}
     </AppDataContext.Provider>
   );

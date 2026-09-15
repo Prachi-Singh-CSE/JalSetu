@@ -369,6 +369,43 @@
   border-color: #35c4d0;
 }
 
+.voice-toggle {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #9aa8b3;
+  border-radius: 10px;
+
+  background: #101d2e;
+  color: #9db2bd;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.voice-toggle:hover {
+  border-color: #35c4d0;
+  color: #35c4d0;
+}
+
+.voice-toggle.is-listening {
+  background: #351b21;
+  border-color: #e45454;
+  color: #ff6d6d;
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 .ask-box button {
   width: 84px;
   height: 42px;

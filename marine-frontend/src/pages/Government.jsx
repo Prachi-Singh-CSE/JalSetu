@@ -1,6 +1,9 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
+import ChatWindow from "../components/ChatWindow";
 import { useAppData } from "../state/useAppData";
+import { useLanguage } from "../state/useLanguage";
+import { voiceLangFor } from "../i18n/voiceLang";
 import "./Government.css";
 
 const schemes = [
@@ -86,21 +89,8 @@ const questions = [
 
 export default function Support() {
   const { state, askWelfare } = useAppData();
+  const { language, t } = useLanguage();
   const [selectedScheme, setSelectedScheme] = useState("diesel");
-  const [question, setQuestion] = useState("");
-
-  const askQuestion = (text) => {
-    const value = text || question;
-
-    if (!value.trim()) return;
-
-    setQuestion(value);
-    askWelfare(value);
-
-    setTimeout(() => {
-      setQuestion("");
-    }, 500);
-  };
 
   return (
     <>
@@ -131,7 +121,10 @@ export default function Support() {
           {/* ================= LEFT COLUMN ================= */}
           <section className="support-left">
 
-            {/* SCHEME ASSISTANT */}
+            {/* SCHEME ASSISTANT — reuses the same ChatWindow component as
+               the AI Assistant page (text + voice input, multi-turn
+               history, suggestion chips) instead of a bespoke single-turn
+               Q&A box. */}
             <div className="scheme-assistant card">
 
               <div className="assistant-heading">
@@ -146,7 +139,6 @@ export default function Support() {
                 </div>
               </div>
 
-
               {/* QUESTIONS */}
               <div className="question-list">
                 {questions.map((item, index) => (
@@ -155,60 +147,23 @@ export default function Support() {
                     className={`question-chip ${
                       index === 0 ? "active" : ""
                     }`}
-                    onClick={() => askQuestion(item)}
+                    onClick={() => askWelfare(item)}
                   >
                     {item}
                   </button>
                 ))}
               </div>
 
-
-              {/* AI RESPONSE */}
-              <div className="assistant-response">
-
-                <div className="response-title">
-                  <span>✣</span>
-                  ASSISTANT
-                </div>
-
-                <p>
-                  {state.welfareResponse?.answer ||
-                    "Based on your profile — registered trawler owner in Maharashtra with 5 crew — you most likely qualify for three schemes. PMMSY covers equipment and safety upgrades, the state diesel subsidy covers fuel, and the fisheries Kisan Credit Card covers working capital."}
-                </p>
-
-                <div className="response-footer">
-                  <div className="response-source">
-                    <span>▣</span>
-                    <small>GPS</small>
-                  </div>
-
-                  <span className="confidence">
-                    Confidence 86% · verified scheme text · Just now
-                  </span>
-                </div>
-
-              </div>
-
-
-              {/* ASK INPUT */}
-              <div className="ask-box">
-                <input
-                  type="text"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      askQuestion();
-                    }
-                  }}
-                  placeholder="Ask about a subsidy or insurance..."
-                />
-
-                <button onClick={() => askQuestion()}>
-                  <span>➤</span>
-                  Ask
-                </button>
-              </div>
+              <ChatWindow
+                compact
+                messages={state.welfareChat}
+                onSubmit={askWelfare}
+                voiceLang={voiceLangFor(language)}
+                placeholder={t("welfare.askPlaceholder")}
+                listeningPlaceholder={t("welfare.listening")}
+                sendLabel={t("welfare.ask")}
+                voiceUnsupportedLabel={t("welfare.voiceUnsupported")}
+              />
 
             </div>
 
