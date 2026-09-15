@@ -1,24 +1,19 @@
 import { AlertTriangle, TriangleAlert, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppData } from "../state/useAppData";
+import { useLanguage } from "../state/useLanguage";
 import "./ProactiveHazardBanner.css";
 
-const SEVERITY_ORDER = { WARNING: 0, CAUTION: 1 };
+const SEVERITY_ORDER = { High: 0, Medium: 1, Low: 2, CRITICAL: 0, WARNING: 1, CAUTION: 2 };
 
 /**
  * Unsolicited, app-wide hazard push notifications.
- *
- * This is deliberately separate from the Alerts *page* (which the user has
- * to navigate to). This component mounts once in App.jsx and surfaces
- * unread, active, non-IMBL alerts as toasts on top of whatever page the
- * user is already on — the "push notification" the requirements doc asks
- * for. IMBL proximity has its own dedicated banner (IMBLSafetyWarning), so
- * it's excluded here to avoid showing the same warning twice.
  */
 export default function ProactiveHazardBanner() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { state, markAlertRead, dismissAlert } = useAppData();
+  const { t } = useLanguage();
 
   // Don't stack toasts on top of the page whose entire job is showing them.
   if (pathname === "/alerts") return null;
@@ -35,7 +30,7 @@ export default function ProactiveHazardBanner() {
       {pending.map((alert) => (
         <article
           key={alert.id}
-          className={`proactive-hazard-toast ${alert.severity.toLowerCase()}`}
+          className={`proactive-hazard-toast ${(alert.severity || "low").toLowerCase()}`}
           role="alert"
         >
           <div className="proactive-hazard-icon">
@@ -44,7 +39,9 @@ export default function ProactiveHazardBanner() {
 
           <div className="proactive-hazard-body">
             <div className="proactive-hazard-heading">
-              <span className="proactive-hazard-severity">{alert.severity}</span>
+              <span className="proactive-hazard-severity">
+                {t(`alerts.severity.${(alert.severity || "CAUTION").toLowerCase()}`) || alert.severity}
+              </span>
               <span className="proactive-hazard-type">{alert.type.replace(/_/g, " ")}</span>
             </div>
 
@@ -58,13 +55,13 @@ export default function ProactiveHazardBanner() {
                   navigate(alert.mapPath);
                 }}
               >
-                View
+                {t("dashboard.view")}
               </button>
               <button
                 className="proactive-hazard-dismiss-text"
                 onClick={() => dismissAlert(alert.id)}
               >
-                Dismiss
+                {t("dashboard.dismiss")}
               </button>
             </div>
           </div>

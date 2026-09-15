@@ -36,16 +36,25 @@ export default function AIAssistant() {
   // Two scripted opening turns that seed the demo, followed by whatever the
   // person has actually asked (state.chat) rendered with the full structured
   // risk/confidence/why/actions breakdown.
+  const isHi = language === "hi";
   const messages = [
     {
       id: "demo-1",
-      question: "Is it safe to go fishing today?",
+      question: t("ai.seed1Question") || "Is it safe to go fishing today?",
       answer: (
         <>
-          Conditions near your current location are currently
-          <strong> {state.risk.status}.</strong> Wave height is {state.marine.ocean.waveHeight}
-          {" "}and wind is {state.marine.ocean.wind}. A nearby hazard is present on the current
-          route. {state.risk.recommendation}
+          {isHi ? (
+            <>
+              आपके वर्तमान स्थान के पास की स्थितियाँ इस समय <strong>{state.risk.status}</strong>। लहरों की ऊँचाई {state.marine.ocean.waveHeight} और हवा {state.marine.ocean.wind} है। वर्तमान मार्ग पर एक पास का खतरा मौजूद है। {state.risk.recommendation}
+            </>
+          ) : (
+            <>
+              Conditions near your current location are currently
+              <strong> {state.risk.status}.</strong> Wave height is {state.marine.ocean.waveHeight}
+              {" "}and wind is {state.marine.ocean.wind}. A nearby hazard is present on the current
+              route. {state.risk.recommendation}
+            </>
+          )}
         </>
       ),
       sources: ["INCOIS", "IMD", "GPS"],
@@ -53,40 +62,57 @@ export default function AIAssistant() {
       reasoning: (
         <>
           <p>
-            Risk is calculated using current ocean conditions, weather, nearby hazards, vessel
-            position and IMBL proximity.
+            {isHi
+              ? "जोखिम की गणना वर्तमान समुद्री स्थितियों, मौसम, नजदीकी खतरों, पोत की स्थिति और IMBL निकटता का उपयोग करके की जाती है।"
+              : "Risk is calculated using current ocean conditions, weather, nearby hazards, vessel position and IMBL proximity."}
           </p>
           <div>
-            <span>Ocean conditions</span>
-            <strong>High impact</strong>
+            <span>{isHi ? "समुद्री स्थितियाँ" : "Ocean conditions"}</span>
+            <strong>{isHi ? "उच्च प्रभाव" : "High impact"}</strong>
           </div>
           <div>
-            <span>Weather</span>
-            <strong>Moderate impact</strong>
+            <span>{isHi ? "मौसम" : "Weather"}</span>
+            <strong>{isHi ? "मध्यम प्रभाव" : "Moderate impact"}</strong>
           </div>
           <div>
-            <span>IMBL proximity</span>
-            <strong>Low impact</strong>
+            <span>{isHi ? "IMBL निकटता" : "IMBL proximity"}</span>
+            <strong>{isHi ? "कम प्रभाव" : "Low impact"}</strong>
           </div>
         </>
       ),
-      suggestions: ["What about tomorrow?", "Explain my risk score", "Find safe harbour"],
+      suggestions: isHi
+        ? ["कल के बारे में क्या?", "मेरा जोखिम स्कोर समझाएँ", "सुरक्षित बंदरगाह खोजें"]
+        : ["What about tomorrow?", "Explain my risk score", "Find safe harbour"],
     },
     {
       id: "demo-2",
-      question: "Explain my risk score",
+      question: t("ai.seed2Question") || "Explain my risk score",
       answer: (
         <>
-          Your score is <strong>{state.risk.score} / 100</strong>.
-          {state.risk.factors
-            .filter((factor) => factor.points > 0)
-            .map((factor) => ` ${factor.name} contributes ${factor.points} points.`)}{" "}
-          {state.risk.status} for the current demo conditions.
+          {isHi ? (
+            <>
+              आपका स्कोर <strong>{state.risk.score} / 100</strong> है।
+              {state.risk.factors
+                .filter((factor) => factor.points > 0)
+                .map((factor) => ` ${factor.name} का ${factor.points} अंक योगदान है।`)}{" "}
+              वर्तमान स्थितियों के लिए {state.risk.status}।
+            </>
+          ) : (
+            <>
+              Your score is <strong>{state.risk.score} / 100</strong>.
+              {state.risk.factors
+                .filter((factor) => factor.points > 0)
+                .map((factor) => ` ${factor.name} contributes ${factor.points} points.`)}{" "}
+              {state.risk.status} for the current demo conditions.
+            </>
+          )}
         </>
       ),
       sources: ["INCOIS", "IMD", "OCEAN MODEL", "GPS"],
       confidence: state.risk.confidence,
-      suggestions: ["What about tomorrow?", "View safer route"],
+      suggestions: isHi
+        ? ["कल के बारे में क्या?", "सुरक्षित मार्ग देखें"]
+        : ["What about tomorrow?", "View safer route"],
     },
     ...state.chat
       .filter((item) => item.question)

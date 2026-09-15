@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useReducer } from "react";
 import {
   getAuthorityAlerts,
+  fetchLiveAlerts,
   evaluateMarineAlerts,
+  updateAlertState,
+  backendUnavailableAlert,
   getDataSourceHealth,
   setDemoSourceStatus,
   getInitialChat,
@@ -25,7 +28,6 @@ function createInitialState() {
   const dataSources = getDataSourceHealth();
   const risk = getRiskAssessment(marine, dataSources);
   const imbl = evaluateIMBLSafety({ routeId: "safer", marineData: marine });
-  const alerts = evaluateMarineAlerts(marine, dataSources, imbl);
 
   return {
     marine,
@@ -46,7 +48,9 @@ function createInitialState() {
       status: "fallback",
       source: "demo",
     },
-    alerts,
+    alerts: [],
+    alertsLoading: true,
+    alertsLive: false,
     authorityAlerts: getAuthorityAlerts(),
     chat: getInitialChat({ risk, marineData: marine, dataSourceHealth: dataSources }),
     sos: getSOSDetails(),
@@ -73,6 +77,31 @@ function createInitialState() {
 
 function appDataReducer(state, action) {
   switch (action.type) {
+    case "set-live-alerts":
+      {
+        const previous = new Map(state.alerts.map((alert) => [alert.id, alert]));
+        const merged = action.alerts.map((alert) => {
+          const local = previous.get(alert.id);
+          if (!local) return alert;
+          return {
+            ...alert,
+            read: Boolean(alert.read || local.read),
+            acknowledged: Boolean(alert.acknowledged || local.acknowledged),
+            status:
+              local.status === "dismissed" || alert.status === "dismissed"
+                ? "dismissed"
+                : alert.acknowledged || local.acknowledged
+                  ? "acknowledged"
+                  : alert.status,
+          };
+        });
+        return {
+          ...state,
+          alerts: merged,
+          alertsLoading: false,
+          alertsLive: !action.liveFailed,
+        };
+      }
     case "acknowledge-alert":
       return {
         ...state,
@@ -113,8 +142,7 @@ function appDataReducer(state, action) {
         setDemoSourceStatus(action.sourceId, action.status);
         const dataSources = getDataSourceHealth();
         const risk = getRiskAssessment(state.marine, dataSources);
-        const alerts = evaluateMarineAlerts(state.marine, dataSources, state.imbl);
-        return { ...state, dataSources, risk, alerts };
+        return { ...state, dataSources, risk };
       }
     case "select-route":
       {
@@ -138,7 +166,6 @@ function appDataReducer(state, action) {
           selectedRouteId: action.routeId,
           routeChangeReason: action.reason || null,
           imbl,
-          alerts: evaluateMarineAlerts(state.marine, state.dataSources, imbl),
           imblDismissed: false,
           imblDwell,
         };
@@ -232,10 +259,18 @@ export function AppDataProvider({ children }) {
   const { language } = useLanguage();
   const [state, dispatch] = useReducer(appDataReducer, undefined, createInitialState);
 
-  const acknowledgeAlert = (alertId) =>
+  const acknowledgeAlert = (alertId) => {
     dispatch({ type: "acknowledge-alert", alertId });
-  const markAlertRead = (alertId) => dispatch({ type: "read-alert", alertId });
-  const dismissAlert = (alertId) => dispatch({ type: "dismiss-alert", alertId });
+    updateAlertState(alertId, "acknowledge").catch(() => {});
+  };
+  const markAlertRead = (alertId) => {
+    dispatch({ type: "read-alert", alertId });
+    updateAlertState(alertId, "read").catch(() => {});
+  };
+  const dismissAlert = (alertId) => {
+    dispatch({ type: "dismiss-alert", alertId });
+    updateAlertState(alertId, "dismiss").catch(() => {});
+  };
   const recordDemoSOS = (details) =>
     dispatch({ type: "record-demo-sos", details });
   const askQuestion = (question) =>
@@ -280,6 +315,46 @@ export function AppDataProvider({ children }) {
 
     return () => clearInterval(interval);
   }, [state.imblDwell.active, state.imblDwell.escalated, state.imblDwell.enteredAt]);
+
+  const positionKey = Array.isArray(state.location?.position)
+    ? state.location.position.join(",")
+    : "";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAlerts() {
+      const [lat, lon] = positionKey.split(",").map(Number);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+      try {
+        const data = await fetchLiveAlerts(lat, lon);
+        if (!cancelled && data.alerts && data.alerts.length > 0) {
+          dispatch({ type: "set-live-alerts", alerts: data.alerts });
+          return;
+        }
+      } catch {
+        // Fall back to evaluated demo alerts localized for current language
+      }
+
+      if (!cancelled) {
+        const demoAlerts = evaluateMarineAlerts(state.marine, state.dataSources, state.imbl, language);
+        dispatch({
+          type: "set-live-alerts",
+          alerts: demoAlerts,
+          liveFailed: true,
+        });
+      }
+    }
+
+    loadAlerts();
+    const interval = setInterval(loadAlerts, 5 * 60 * 1000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [positionKey, language, state.marine, state.dataSources, state.imbl]);
 
   return (
     <AppDataContext.Provider value={{ state, acknowledgeAlert, markAlertRead, dismissAlert, recordDemoSOS, askQuestion, selectRoute, updateLocation, dismissIMBL, acknowledgeAuthority, setSourceStatus, askWelfare, replayHazardPush }}>

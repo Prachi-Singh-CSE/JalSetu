@@ -24,15 +24,15 @@ from app.session_manager import SessionState
 
 FOLLOWUP_MARKERS = (
     "what about", "and the day after", "same for", "what if", "also",
-    "and tomorrow", "how about", "and near", "instead",
+    "and tomorrow", "how about", "and near", "instead", "aur", "kal", "parso", "kal subah",
 )
 
-WEATHER_KEYWORDS = ("weather", "wind", "wave", "tide", "rain", "storm", "cyclone", "lightning", "sea state")
-OCEAN_KEYWORDS = ("fish", "fishing", "pfz", "fishing zone", "sst", "chlorophyll", "subsurface")
-ROUTE_KEYWORDS = ("route", "sail", "safe way", "harbor", "harbour", "navigate", "go to", "path")
-HAZARD_KEYWORDS = ("oil", "spill", "slick", "suspicious vessel", "hazard", "vessel")
-WELFARE_KEYWORDS = ("subsidy", "scheme", "pmmsy", "pmsby", "insurance", "welfare", "eligible", "eligibility", "diesel")
-EMERGENCY_KEYWORDS = ("sos", "emergency", "help me", "distress", "danger", "stranded", "sinking")
+WEATHER_KEYWORDS = ("weather", "wind", "wave", "tide", "rain", "storm", "cyclone", "lightning", "sea state", "mausam", "toofan", "tufan", "hawa", "barish", "baarish")
+OCEAN_KEYWORDS = ("fish", "fishing", "pfz", "fishing zone", "sst", "chlorophyll", "subsurface", "machli", "machi", "matsya")
+ROUTE_KEYWORDS = ("route", "sail", "safe way", "harbor", "harbour", "navigate", "go to", "path", "raasta", "rasta", "bandar", "bunder")
+HAZARD_KEYWORDS = ("oil", "spill", "slick", "suspicious vessel", "hazard", "vessel", "khatra", "khatre")
+WELFARE_KEYWORDS = ("subsidy", "scheme", "pmmsy", "pmsby", "insurance", "welfare", "eligible", "eligibility", "diesel", "bima", "yojana")
+EMERGENCY_KEYWORDS = ("sos", "emergency", "help me", "distress", "danger", "stranded", "sinking", "bachao", "madad")
 RISK_TRIGGER_KEYWORDS = WEATHER_KEYWORDS + OCEAN_KEYWORDS + ROUTE_KEYWORDS  # risk score backs these up
 
 _PLACE_RE = re.compile(
@@ -40,7 +40,7 @@ _PLACE_RE = re.compile(
 )
 _RELATIVE_DATE_MAP = {
     "today": 0, "tonight": 0, "tomorrow": 1, "day after tomorrow": 2,
-    "day after": 2, "next week": 7,
+    "day after": 2, "next week": 7, "aaj": 0, "kal": 1, "kal subah": 1, "parso": 2,
 }
 
 
@@ -62,7 +62,7 @@ def _looks_like_followup(text: str) -> bool:
     if any(m in low for m in FOLLOWUP_MARKERS):
         return True
     # very short queries with no place/verb of their own are usually follow-ups
-    return len(low.split()) <= 6 and not any(low.startswith(w) for w in ("what", "how", "is", "are", "can"))
+    return len(low.split()) <= 6 and not any(low.startswith(w) for w in ("what", "how", "is", "are", "can", "kya"))
 
 
 class PlannerAgent:
@@ -117,21 +117,20 @@ class PlannerAgent:
             add(AgentName.EMERGENCY, "distress language detected in query")
             # Emergency short-circuits everything else in the orchestrator.
 
-        generic_safety_query = any(p in low for p in ("should i go", "safe to", "is it safe", "go fishing"))
+        generic_safety_query = any(p in low for p in ("should i go", "safe to", "is it safe", "go fishing", "jaana safe", "safe hai", "fishing ke liye", "ja sakte", "kya main"))
         no_keywords_matched = not any(
             [wants_weather, wants_ocean, wants_route, wants_hazard, wants_welfare, wants_emergency]
         )
         if wants_weather or wants_ocean or generic_safety_query or (no_keywords_matched and not wants_emergency):
-            # "should I go fishing tomorrow near X" has no literal "weather"
-            # keyword but implies it -- default weather+ocean+risk fan-out
-            # for generic "should I go / is it safe" style questions.
+            # "should I go fishing tomorrow near X" / "Kal subah fishing ke liye jaana safe hai?"
+            # has no literal "weather" keyword but implies it -- default weather+ocean+risk fan-out.
             add(AgentName.WEATHER, "conditions requested or implied by a general safety/fishing query")
 
-        if wants_ocean or "should i go" in low or "safe to" in low or "go fishing" in low:
+        if wants_ocean or generic_safety_query:
             add(AgentName.OCEAN, "PFZ / subsurface ocean data relevant to fishing decision")
 
         risk_id = None
-        if wants_weather or wants_ocean or wants_route or "should i go" in low or "safe" in low:
+        if wants_weather or wants_ocean or wants_route or generic_safety_query or "safe" in low:
             weather_ids = [st.id for st in subtasks if st.agent == AgentName.WEATHER]
             ocean_ids = [st.id for st in subtasks if st.agent == AgentName.OCEAN]
             risk_id = add(

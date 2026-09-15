@@ -1,151 +1,187 @@
-const { getIMDAlerts } = require("./imdAlertService");
-const { getINCOISAlerts } = require("./incoisAlertService");
+const axios = require("axios");
+const { getWeatherData } = require("./weatherService");
+const { applyStoredState } = require("./alertStateStore");
+const {
+    generateConditionAlerts,
+    generateUnavailableAlert,
+    generateGisAlerts
+} = require("./alertGenerator");
+
+function isUnavailable(status) {
+    return status === "unavailable" || status === "error";
+}
+
+async function fetchGisSnapshot(lat, lon) {
+    const base = (process.env.GIS_HAZARD_SERVICE_URL || "").trim();
+    if (!base) {
+        return { configured: false };
+    }
+
+    const snapshot = {
+        configured: true,
+        slicks: [],
+        anomalies: [],
+        imbl: null,
+        feedError: null,
+        imblError: null
+    };
+
+    try {
+        const feed = await axios.get(`${base.replace(/\/$/, "")}/api/hazard/feed`, {
+            timeout: 4000
+        });
+        snapshot.slicks = Array.isArray(feed.data?.sarConfirmedHazards)
+            ? feed.data.sarConfirmedHazards
+            : [];
+        snapshot.anomalies = Array.isArray(feed.data?.aisAnomalies)
+            ? feed.data.aisAnomalies
+            : [];
+    } catch (error) {
+        snapshot.feedError = error.message;
+    }
+
+    try {
+        const imblRes = await axios.post(
+            `${base.replace(/\/$/, "")}/api/hazard/imbl-check`,
+            {
+                vesselId: process.env.IMBL_VESSEL_ID || "current-user",
+                lat: Number(lat),
+                lng: Number(lon)
+            },
+            { timeout: 4000 }
+        );
+        snapshot.imbl = imblRes.data;
+    } catch (error) {
+        snapshot.imblError = error.message;
+    }
+
+    return snapshot;
+}
 
 const getAlertData = async (lat, lon) => {
-    try {
-        const latitude = Number(lat);
-        const longitude = Number(lon);
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+    const place = `${latitude.toFixed(2)}°N, ${longitude.toFixed(2)}°E`;
 
-        const [imdData, incoisData] = await Promise.all([
-            getIMDAlerts(latitude, longitude),
-            getINCOISAlerts(latitude, longitude)
+    try {
+        const [weatherData, gis] = await Promise.all([
+            getWeatherData(latitude, longitude),
+            fetchGisSnapshot(latitude, longitude)
         ]);
 
-        const allAlerts = [
-            ...(imdData.alerts || []),
-            ...(incoisData.alerts || [])
-        ];
+        const alerts = [];
 
-        // Remove expired alerts
-        const now = Date.now();
-
-        const activeAlerts = allAlerts.filter((alert) => {
-            if (!alert.expiresAt) {
-                return true;
-            }
-
-            return new Date(alert.expiresAt).getTime() > now;
-        });
-
-        // Highest severity
-        const severityRank = {
-            NONE: 0,
-            LOW: 1,
-            MODERATE: 2,
-            HIGH: 3,
-            EXTREME: 4
-        };
-
-        let highestSeverity = "NONE";
-
-        activeAlerts.forEach((alert) => {
-            const severity = alert.severity || "LOW";
-
-            if (
-                severityRank[severity] >
-                severityRank[highestSeverity]
-            ) {
-                highestSeverity = severity;
-            }
-        });
-
-        // Safety status
-        let safetyStatus = "SAFE";
-
-        if (highestSeverity === "MODERATE") {
-            safetyStatus = "CAUTION";
+        if (weatherData.dataStatus === "error") {
+            alerts.push(generateUnavailableAlert({
+                id: "source-open-meteo",
+                sourceName: "Open-Meteo Weather / Marine",
+                message: weatherData.message || "Live weather and wave data could not be reached.",
+                location: place
+            }));
+        } else {
+            alerts.push(...generateConditionAlerts({
+                lat: latitude,
+                lon: longitude,
+                weather: weatherData.weather || {},
+                ocean: weatherData.ocean || {}
+            }));
         }
 
-        if (highestSeverity === "HIGH") {
-            safetyStatus = "DANGER";
+        if (isUnavailable(weatherData.imd?.dataStatus)) {
+            alerts.push(generateUnavailableAlert({
+                id: "source-imd",
+                sourceName: "IMD",
+                message:
+                    weatherData.imd?.message ||
+                    "IMD cyclone and lightning alert feed is not available.",
+                location: place
+            }));
         }
 
-        if (highestSeverity === "EXTREME") {
-            safetyStatus = "EMERGENCY";
+        if (isUnavailable(weatherData.incois?.dataStatus)) {
+            alerts.push(generateUnavailableAlert({
+                id: "source-incois",
+                sourceName: "INCOIS",
+                message:
+                    weatherData.incois?.message ||
+                    "INCOIS marine alert feed is not available.",
+                location: place
+            }));
         }
 
-        const sourceStatuses = [
-            imdData.dataStatus,
-            incoisData.dataStatus
-        ];
-
-        let dataStatus = "live";
-
-        if (
-            sourceStatuses.includes("error") &&
-            sourceStatuses.every(
-                (status) => status === "error"
-            )
-        ) {
-            dataStatus = "error";
-        } else if (
-            sourceStatuses.includes("unavailable")
-        ) {
-            dataStatus = "partial";
+        if (gis.configured && gis.feedError) {
+            alerts.push(generateUnavailableAlert({
+                id: "source-gis-hazards",
+                sourceName: "GIS hazard feed",
+                message: `Oil-slick and vessel-activity feed could not be reached: ${gis.feedError}`,
+                location: place
+            }));
+        } else if (gis.configured) {
+            alerts.push(...generateGisAlerts({
+                lat: latitude,
+                lon: longitude,
+                slicks: gis.slicks,
+                anomalies: gis.anomalies,
+                imbl: gis.imbl
+            }));
         }
+
+        if (gis.configured && gis.imblError) {
+            alerts.push(generateUnavailableAlert({
+                id: "source-imbl",
+                sourceName: "GIS IMBL check",
+                message: `IMBL proximity check could not be completed: ${gis.imblError}`,
+                location: place
+            }));
+        }
+
+        const uniqueAlerts = Array.from(
+            new Map(alerts.map((alert) => [alert.id, alert])).values()
+        ).map(applyStoredState);
+
+        const rank = { Low: 1, Medium: 2, High: 3 };
+        uniqueAlerts.sort((a, b) => (rank[b.severity] || 0) - (rank[a.severity] || 0));
+
+        const highestSeverity = uniqueAlerts.reduce((highest, alert) => {
+            return (rank[alert.severity] || 0) > (rank[highest] || 0)
+                ? alert.severity
+                : highest;
+        }, "Low");
 
         return {
             location: {
                 latitude,
                 longitude
             },
-
-            alerts: activeAlerts,
-
-            alertCount: activeAlerts.length,
-
-            highestSeverity,
-
-            safety: {
-                status: safetyStatus,
-                message:
-                    safetyStatus === "SAFE"
-                        ? "No active marine alerts detected"
-                        : safetyStatus === "CAUTION"
-                        ? "Moderate marine conditions detected"
-                        : safetyStatus === "DANGER"
-                        ? "Dangerous marine conditions detected"
-                        : "Emergency marine alert detected"
-            },
-
-            sources: [
-                imdData,
-                incoisData
-            ],
-
-            dataStatus,
-
+            alerts: uniqueAlerts,
+            alertCount: uniqueAlerts.length,
+            highestSeverity: uniqueAlerts.length ? highestSeverity : "NONE",
+            cycloneTrackingAvailable: false,
+            gisHazardsConfigured: Boolean(gis.configured),
             generatedAt: new Date().toISOString()
         };
-
     } catch (error) {
-        console.error(
-            "❌ Alert Service Error:",
-            error.message
-        );
+        console.error("❌ Alert Service Error:", error.message);
+
+        const fallback = generateUnavailableAlert({
+            id: "source-alert-engine",
+            sourceName: "Alert engine",
+            message: "Unable to generate marine alerts right now.",
+            location: place
+        });
 
         return {
             location: {
-                latitude: Number(lat),
-                longitude: Number(lon)
+                latitude,
+                longitude
             },
-
-            alerts: [],
-
-            alertCount: 0,
-
-            highestSeverity: "NONE",
-
-            safety: {
-                status: "UNKNOWN",
-                message: "Alert data temporarily unavailable"
-            },
-
-            sources: [],
-
-            dataStatus: "error",
-
-            generatedAt: new Date().toISOString()
+            alerts: [applyStoredState(fallback)],
+            alertCount: 1,
+            highestSeverity: "Low",
+            cycloneTrackingAvailable: false,
+            gisHazardsConfigured: false,
+            generatedAt: new Date().toISOString(),
+            dataStatus: "error"
         };
     }
 };
