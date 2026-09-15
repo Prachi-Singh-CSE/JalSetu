@@ -1,3 +1,54 @@
+import { apiGet, apiPatch } from "./api";
+
+export function normalizeAlert(alert = {}) {
+  return {
+    ...alert,
+    id: alert.id || `alert-${Date.now()}`,
+    type: alert.type || "HAZARD",
+    severity: alert.severity || "Low",
+    title: alert.title || "Marine alert",
+    message: alert.message || "",
+    location: alert.location || "Unknown",
+    time: alert.time || alert.timestamp || new Date().toISOString(),
+    timestamp: alert.time || alert.timestamp || new Date().toISOString(),
+    recommendedAction: alert.recommendedAction || "",
+    status: alert.status || "active",
+    acknowledged: Boolean(alert.acknowledged),
+    read: Boolean(alert.read),
+    sources: Array.isArray(alert.sources) ? alert.sources : [],
+    mapPath: alert.mapPath || "/map",
+  };
+}
+
+export async function fetchLiveAlerts(lat, lon) {
+  const json = await apiGet(`/api/alerts?lat=${lat}&lon=${lon}`);
+  const data = json.data || {};
+
+  return {
+    ...data,
+    alerts: Array.isArray(data.alerts) ? data.alerts.map(normalizeAlert) : [],
+  };
+}
+
+export async function updateAlertState(id, action) {
+  return apiPatch(`/api/alerts/${encodeURIComponent(id)}/${action}`);
+}
+
+export function backendUnavailableAlert() {
+  return normalizeAlert({
+    id: "source-backend",
+    type: "DATA_SOURCE_UNAVAILABLE",
+    severity: "Low",
+    title: "Marine API unavailable",
+    message:
+      "The alert service could not be reached. Live condition alerts are not available.",
+    location: "Platform",
+    recommendedAction: "Start the backend and refresh this page.",
+    sources: ["Marine API"],
+    mapPath: "/intelligence",
+  });
+}
+
 function alertRecord({
   id,
   type,

@@ -47,8 +47,6 @@ const getWeatherData = async (lat, lon) => {
         // CACHE CHECK
         // =========================
 
-        const cacheKey = `weather:${latitude}:${longitude}`;
-
         const cachedData = getCache(cacheKey);
 
         if (cachedData) {
@@ -77,7 +75,7 @@ const getWeatherData = async (lat, lon) => {
             `https://api.open-meteo.com/v1/forecast` +
             `?latitude=${latitude}` +
             `&longitude=${longitude}` +
-            `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m` +
+            `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code` +
             `&wind_speed_unit=kmh`;
 
         // =========================
@@ -132,7 +130,10 @@ const getWeatherData = async (lat, lon) => {
                     weather.current?.wind_direction_10m ?? null,
 
                 humidity:
-                    weather.current?.relative_humidity_2m ?? null
+                    weather.current?.relative_humidity_2m ?? null,
+
+                weatherCode:
+                    weather.current?.weather_code ?? null
             },
 
             ocean: {
@@ -268,7 +269,8 @@ const getWeatherData = async (lat, lon) => {
                 condition: null,
                 windSpeed: null,
                 windDirection: null,
-                humidity: null
+                humidity: null,
+                weatherCode: null
             },
 
             ocean: {

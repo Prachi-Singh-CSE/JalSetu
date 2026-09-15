@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAppData } from "../state/useAppData";
 import "./ProactiveHazardBanner.css";
 
-const SEVERITY_ORDER = { WARNING: 0, CAUTION: 1 };
+const SEVERITY_ORDER = { High: 0, Medium: 1, Low: 2, CRITICAL: 0, WARNING: 1, CAUTION: 2 };
 
 /**
  * Unsolicited, app-wide hazard push notifications.
@@ -35,7 +35,7 @@ export default function ProactiveHazardBanner() {
       {pending.map((alert) => (
         <article
           key={alert.id}
-          className={`proactive-hazard-toast ${alert.severity.toLowerCase()}`}
+          className={`proactive-hazard-toast ${(alert.severity || "low").toLowerCase()}`}
           role="alert"
         >
           <div className="proactive-hazard-icon">
