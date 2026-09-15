@@ -11,10 +11,10 @@ require('dotenv').config();
  * and subsurface-data confidence (also from Prachi's Ocean Data Agent)
  * into one 0-100 composite Marine Risk Score.
  *
- * IMPORTANT: the exact JSON shape of Prachi's weather/ocean response below
- * is a PLACEHOLDER — confirm the real field names with her and update
- * `fetchWeatherOceanContext()` accordingly. Until her service is live,
- * this falls back to safe defaults so the rest of the pipeline still runs.
+ * The upstream weather/ocean contract is normalized so either camelCase
+ * (waveHeightM, windSpeedKts, ...) or snake_case (wave_height_m,
+ * wind_speed_kts, ...) responses from Prachi's service are accepted without
+ * changing the scoring code below.
  */
 
 const WEATHER_OCEAN_SERVICE_URL = process.env.WEATHER_OCEAN_SERVICE_URL;
@@ -26,14 +26,36 @@ async function fetchWeatherOceanContext({ lat, lng }) {
       params: { lat, lng },
       timeout: 4000
     });
-    // Expected shape (confirm with Prachi):
-    // { waveHeightM, windSpeedKts, cycloneDistanceKm, lightningRisk (0-1),
-    //   subsurfaceConfidence (0-1), stale (bool) }
-    return data;
+    const normalized = normalizeWeatherOceanContext(data);
+    return { ...normalized, source: 'live' };
   } catch (err) {
     console.warn('[risk.service] weather/ocean service unavailable, using defaults:', err.message);
     return defaultWeatherOceanContext();
   }
+}
+
+/**
+ * Accepts either camelCase or snake_case field names from the upstream
+ * weather/ocean service and returns a single canonical shape. Missing
+ * fields fall back to the same safe defaults used when the service is
+ * unreachable, so a partial upstream response never produces NaNs.
+ */
+function normalizeWeatherOceanContext(raw = {}) {
+  const pick = (camel, snake, fallback) =>
+    raw[camel] !== undefined && raw[camel] !== null
+      ? raw[camel]
+      : raw[snake] !== undefined && raw[snake] !== null
+        ? raw[snake]
+        : fallback;
+
+  return {
+    waveHeightM: pick('waveHeightM', 'wave_height_m', 1.0),
+    windSpeedKts: pick('windSpeedKts', 'wind_speed_kts', 10),
+    cycloneDistanceKm: pick('cycloneDistanceKm', 'cyclone_distance_km', null),
+    lightningRisk: pick('lightningRisk', 'lightning_risk', 0),
+    subsurfaceConfidence: pick('subsurfaceConfidence', 'subsurface_confidence', 0.5),
+    stale: Boolean(pick('stale', 'stale', false))
+  };
 }
 
 function defaultWeatherOceanContext() {
@@ -43,7 +65,8 @@ function defaultWeatherOceanContext() {
     cycloneDistanceKm: null,
     lightningRisk: 0,
     subsurfaceConfidence: 0.5,
-    stale: true
+    stale: true,
+    source: 'default'
   };
 }
 
@@ -134,7 +157,8 @@ async function computeMarineRiskScore({ lat, lng }) {
       lightningRisk: weatherOcean.lightningRisk,
       nearestHazardKm: hazardDistanceKm,
       subsurfaceConfidence: weatherOcean.subsurfaceConfidence,
-      dataStale: Boolean(weatherOcean.stale)
+      dataStale: Boolean(weatherOcean.stale),
+      dataSource: weatherOcean.source || (weatherOcean.stale ? 'default' : 'live')
     }
   };
 }
@@ -149,4 +173,13 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-module.exports = { computeMarineRiskScore };
+module.exports = {
+  computeMarineRiskScore,
+  normalizeWeatherOceanContext,
+  scoreWave,
+  scoreWind,
+  scoreCyclone,
+  scoreLightning,
+  scoreHazardProximity,
+  scoreConfidencePenalty
+};

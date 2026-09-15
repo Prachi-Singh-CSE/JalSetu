@@ -77,7 +77,8 @@ function confidenceFromDistance(distanceKm) {
   return Math.round((1 - distanceKm / CORRELATION_RADIUS_KM) * 100) / 100;
 }
 
-/** Optionally triggers a fresh SAR inference pass via the Python service, if configured. */
+/** Optionally triggers a fresh SAR inference pass via the Python service, if configured,
+ * and persists any returned detections into hazard_detections. */
 async function requestSarInference({ bbox, sceneDate }) {
   if (!SAR_INFERENCE_SERVICE_URL) {
     return { triggered: false, reason: 'SAR_INFERENCE_SERVICE_URL not configured — using existing hazard_detections rows' };
@@ -88,11 +89,39 @@ async function requestSarInference({ bbox, sceneDate }) {
       { bbox, sceneDate },
       { timeout: 15000 }
     );
-    return { triggered: true, result: data };
+    const detections = data.detections || data.results || [];
+    const persisted = await persistSarDetections(detections);
+    return { triggered: true, result: data, persisted };
   } catch (err) {
     console.warn('[hazard.service] SAR inference service call failed:', err.message);
     return { triggered: false, reason: err.message };
   }
+}
+
+/**
+ * Writes SAR/U-Net inference results into hazard_detections. Expects each
+ * detection to carry a GeoJSON Polygon/MultiPolygon `geometry` and a
+ * `confidence` in [0,1]; an optional `source` overrides the default
+ * 'sentinel-1' provenance tag. Malformed entries are skipped rather than
+ * failing the whole batch.
+ */
+async function persistSarDetections(detections = []) {
+  const saved = [];
+  for (const detection of detections) {
+    const geometry = detection.geometry;
+    if (!geometry || !['Polygon', 'MultiPolygon'].includes(geometry.type)) {
+      console.warn('[hazard.service] skipping SAR detection with missing/invalid geometry');
+      continue;
+    }
+    const { rows } = await query(
+      `INSERT INTO hazard_detections (hazard_type, geom, confidence, sar_source)
+       VALUES ('oil_slick', ST_SetSRID(ST_GeomFromGeoJSON($1), 4326), $2, $3)
+       RETURNING id, detected_at`,
+      [JSON.stringify(geometry), detection.confidence ?? null, detection.source || 'sentinel-1']
+    );
+    saved.push({ id: rows[0].id, detectedAt: rows[0].detected_at, confidence: detection.confidence ?? null });
+  }
+  return saved;
 }
 
 /** Combined proactive hazard feed: recent SAR-confirmed slicks + fresh AIS anomalies. */

@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const gisService = require('../services/gis.service');
 
+// GET /api/gis/status -> DB connectivity + whether reference layers are seeded
+router.get('/status', async (req, res, next) => {
+  try {
+    const status = await gisService.getStatus();
+    res.status(status.dbConnected ? 200 : 503).json(status);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/gis/layers -> all layers combined (for initial map load)
 router.get('/layers', async (req, res, next) => {
   try {

@@ -55,6 +55,40 @@ async function getHazardOverlayGeoJSON({ sinceHours = 72 } = {}) {
   return toFeatureCollection(rows);
 }
 
+/**
+ * Reports whether the DB is reachable and whether each reference layer has
+ * been seeded, so the frontend/ops can tell "empty because nothing loaded
+ * yet" apart from "broken connection" at a glance.
+ */
+async function getStatus() {
+  const tables = {
+    pfzZones: 'pfz_zones',
+    restrictedZones: 'restricted_zones',
+    imblBoundary: 'imbl_boundary',
+    safeHarbors: 'safe_harbors',
+    hazardDetections: 'hazard_detections'
+  };
+
+  try {
+    const counts = {};
+    for (const [key, table] of Object.entries(tables)) {
+      const { rows } = await query(`SELECT COUNT(*)::int AS count FROM ${table}`);
+      counts[key] = rows[0].count;
+    }
+    return {
+      dbConnected: true,
+      layers: counts,
+      ready: counts.imblBoundary > 0 && counts.safeHarbors > 0
+    };
+  } catch (err) {
+    return {
+      dbConnected: false,
+      error: err.message,
+      ready: false
+    };
+  }
+}
+
 /** Combines all map layers into one payload — handy for initial map load. */
 async function getAllLayers() {
   const [pfz, restricted, imbl, harbors, hazards] = await Promise.all([
@@ -78,6 +112,7 @@ function toFeatureCollection(rows) {
 }
 
 module.exports = {
+  getStatus,
   getPfzZonesGeoJSON,
   getRestrictedZonesGeoJSON,
   getImblBoundaryGeoJSON,

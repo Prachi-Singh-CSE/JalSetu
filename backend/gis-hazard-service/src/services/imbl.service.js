@@ -69,13 +69,13 @@ async function checkImblProximity({ vesselId, lat, lng }) {
 
   if (dwellSeconds >= DWELL_ESCALATION_SECONDS && !record.escalated) {
     await query(`UPDATE imbl_dwell_tracking SET escalated = TRUE WHERE vessel_id = $1`, [vesselId]);
-    await pushToAuthorityDashboard({
+    const dashboardDelivery = await pushToAuthorityDashboard({
       alertType: 'imbl_escalation',
       vesselId,
       location: { lat, lng },
       dwellSeconds
     });
-    return { inBuffer: true, warning: true, escalated: true, dwellSeconds };
+    return { inBuffer: true, warning: true, escalated: true, dwellSeconds, dashboardDelivery };
   }
 
   return { inBuffer: true, warning: true, escalated: record.escalated, dwellSeconds };

@@ -29,17 +29,22 @@ async function triggerSOS({ vesselId, lat, lng }) {
     [vesselId, lng, lat, nearestHarbor ? nearestHarbor.id : null]
   );
 
-  const alert = {
+  const dashboardDelivery = await pushToAuthorityDashboard({
+    alertType: 'manual_sos',
+    vesselId,
+    location: { lat, lng },
+    nearestHarbor,
+    sosAlertId: rows[0].id
+  });
+
+  return {
     sosAlertId: rows[0].id,
     vesselId,
     location: { lat, lng },
     nearestHarbor,
-    createdAt: rows[0].created_at
+    createdAt: rows[0].created_at,
+    dashboardDelivery
   };
-
-  await pushToAuthorityDashboard({ alertType: 'manual_sos', vesselId, location: { lat, lng }, nearestHarbor, sosAlertId: alert.sosAlertId });
-
-  return alert;
 }
 
 /** Shared push used by both manual SOS and automatic IMBL escalation. */

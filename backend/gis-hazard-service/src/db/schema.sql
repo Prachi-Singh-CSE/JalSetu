@@ -30,12 +30,14 @@ CREATE INDEX IF NOT EXISTS idx_restricted_zones_geom ON restricted_zones USING G
 CREATE TABLE IF NOT EXISTS imbl_boundary (
   id SERIAL PRIMARY KEY,
   name TEXT DEFAULT 'International Maritime Boundary Line',
+  source TEXT DEFAULT 'official-import',  -- provenance of the authoritative geometry (e.g. NHO/Survey of India)
   geom GEOMETRY(LineString, 4326) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS safe_harbors (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
+  source TEXT DEFAULT 'official-import',
   geom GEOMETRY(Point, 4326) NOT NULL,
   capacity_notes TEXT
 );
