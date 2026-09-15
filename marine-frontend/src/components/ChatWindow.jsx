@@ -46,9 +46,19 @@ export default function ChatWindow({
     onSubmit(question);
   };
 
-  const { toggle: toggleVoice, listening, supported: voiceSupported } = useVoiceInput({
+  const {
+    toggle: toggleVoice,
+    stop: stopVoice,
+    cancel: cancelVoice,
+    listening,
+    transcript: liveTranscript,
+    supported: voiceSupported,
+  } = useVoiceInput({
     lang: voiceLang,
-    onResult: (transcript) => submit(transcript),
+    onResult: (transcriptText) => {
+      setValue(transcriptText);
+      submit(transcriptText);
+    },
   });
 
   return (
@@ -63,6 +73,48 @@ export default function ChatWindow({
       </div>
 
       <div className="chat-input-area">
+        {listening && (
+          <div className="voice-listening-banner">
+            <div className="voice-banner-header">
+              <span className="voice-indicator-dot pulsing" />
+              <strong>{listeningPlaceholder}</strong>
+              <div className="voice-actions">
+                <button
+                  type="button"
+                  className="voice-btn voice-stop-btn"
+                  onClick={() => {
+                    if (liveTranscript.trim()) {
+                      const text = liveTranscript.trim();
+                      stopVoice();
+                      submit(text);
+                    } else {
+                      stopVoice();
+                    }
+                  }}
+                  title="Done / Stop recording"
+                >
+                  Done
+                </button>
+                <button
+                  type="button"
+                  className="voice-btn voice-cancel-btn"
+                  onClick={cancelVoice}
+                  title="Cancel recording"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+            <div className="voice-live-transcript">
+              {liveTranscript ? (
+                <span>"{liveTranscript}"</span>
+              ) : (
+                <span className="voice-speaking-prompt">Speak clearly into your microphone...</span>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="chat-input">
           <input
             value={value}
@@ -80,14 +132,11 @@ export default function ChatWindow({
               onClick={toggleVoice}
               aria-pressed={listening}
               aria-label={listening ? listeningPlaceholder : placeholder}
+              title={listening ? "Stop recording" : "Start voice input"}
             >
               {listening ? <MicOff size={13} /> : <Mic size={13} />}
             </button>
           ) : (
-            // No SpeechRecognition in this browser (Firefox/Safari have no
-            // built-in fallback). Rather than hiding the control — which
-            // reads as broken — show it disabled with a tooltip explaining
-            // why, so the person knows to type instead of assuming it's a bug.
             <button
               type="button"
               className="mic-button is-disabled"

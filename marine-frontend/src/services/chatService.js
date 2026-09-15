@@ -85,55 +85,85 @@ function responseText(intent, risk, marineData, lang = "en") {
   return builder(usesRiskData ? risk : marineData);
 }
 
-// Intent detection stays keyword-based on the raw question text — this only
-// decides *which* canned template to use, not the language of the reply, so
-// it recognises a mix of English and common Hindi keywords.
+// Intent detection stays keyword-based on raw question text — recognizes English,
+// Devanagari Hindi, Marathi, and mixed Hinglish (Romanized Hindi-English) queries
+// like "Kal subah fishing ke liye jaana safe hai?", "machli kahan milegi", "khatra kya hai".
 function intentForQuestion(question) {
   const normalized = question.toLowerCase();
+
   if (
     normalized.includes("why") ||
     normalized.includes("explain") ||
+    normalized.includes("kyun") ||
+    normalized.includes("kyu") ||
+    normalized.includes("karan") ||
+    normalized.includes("batao") ||
+    normalized.includes("samajh") ||
     normalized.includes("क्यों") ||
     normalized.includes("समजावून")
   )
     return "why";
+
   if (
     normalized.includes("route") ||
     normalized.includes("harbour") ||
     normalized.includes("harbor") ||
+    normalized.includes("raasta") ||
+    normalized.includes("rasta") ||
+    normalized.includes("bandar") ||
+    normalized.includes("bunder") ||
     normalized.includes("बंदरगाह") ||
     normalized.includes("मार्ग") ||
     normalized.includes("बंदर")
   )
     return "route";
+
   if (
     normalized.includes("zone") ||
     normalized.includes("fishing area") ||
+    normalized.includes("machli") ||
+    normalized.includes("machi") ||
+    normalized.includes("matsya") ||
+    normalized.includes("मछली") ||
     normalized.includes("क्षेत्र")
   )
     return "zone";
+
   if (
     normalized.includes("hazard") ||
     normalized.includes("danger") ||
+    normalized.includes("khatra") ||
+    normalized.includes("khatre") ||
     normalized.includes("खतरा") ||
     normalized.includes("धोका")
   )
     return "hazard";
+
   if (
     normalized.includes("cyclone") ||
     normalized.includes("weather") ||
+    normalized.includes("toofan") ||
+    normalized.includes("tufan") ||
+    normalized.includes("mausam") ||
+    normalized.includes("hawa") ||
+    normalized.includes("barish") ||
+    normalized.includes("baarish") ||
     normalized.includes("चक्रवात") ||
     normalized.includes("मौसम") ||
     normalized.includes("हवामान")
   )
     return "cyclone";
+
   if (
     normalized.includes("cross") ||
     normalized.includes("imbl") ||
     normalized.includes("boundary") ||
+    normalized.includes("seema") ||
+    normalized.includes("border") ||
     normalized.includes("सीमा")
   )
     return "boundary";
+
   return "risk";
 }
 

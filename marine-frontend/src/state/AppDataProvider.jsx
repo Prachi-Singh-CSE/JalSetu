@@ -2,6 +2,7 @@ import { useCallback, useEffect, useReducer } from "react";
 import {
   getAuthorityAlerts,
   fetchLiveAlerts,
+  evaluateMarineAlerts,
   updateAlertState,
   backendUnavailableAlert,
   getDataSourceHealth,
@@ -328,17 +329,21 @@ export function AppDataProvider({ children }) {
 
       try {
         const data = await fetchLiveAlerts(lat, lon);
-        if (!cancelled) {
+        if (!cancelled && data.alerts && data.alerts.length > 0) {
           dispatch({ type: "set-live-alerts", alerts: data.alerts });
+          return;
         }
       } catch {
-        if (!cancelled) {
-          dispatch({
-            type: "set-live-alerts",
-            alerts: [backendUnavailableAlert()],
-            liveFailed: true,
-          });
-        }
+        // Fall back to evaluated demo alerts localized for current language
+      }
+
+      if (!cancelled) {
+        const demoAlerts = evaluateMarineAlerts(state.marine, state.dataSources, state.imbl, language);
+        dispatch({
+          type: "set-live-alerts",
+          alerts: demoAlerts,
+          liveFailed: true,
+        });
       }
     }
 
@@ -349,7 +354,7 @@ export function AppDataProvider({ children }) {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [positionKey]);
+  }, [positionKey, language, state.marine, state.dataSources, state.imbl]);
 
   return (
     <AppDataContext.Provider value={{ state, acknowledgeAlert, markAlertRead, dismissAlert, recordDemoSOS, askQuestion, selectRoute, updateLocation, dismissIMBL, acknowledgeAuthority, setSourceStatus, askWelfare, replayHazardPush }}>

@@ -14,14 +14,17 @@ import { useNavigate } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import { useAppData } from "../state/useAppData";
+import { useLanguage } from "../state/useLanguage";
 import "./Alerts.css";
 
 export default function Alerts() {
   const navigate = useNavigate();
   const { state, acknowledgeAlert, markAlertRead, dismissAlert, selectRoute, replayHazardPush } = useAppData();
+  const { t } = useLanguage();
   const { imbl } = state;
   const [filter, setFilter] = useState("All");
   const [replayed, setReplayed] = useState(false);
+
   const visibleAlerts = state.alerts.filter((alert) => {
     if (filter === "All") return alert.status !== "dismissed";
     if (filter === "Active") return ["active", "read"].includes(alert.status);
@@ -31,6 +34,15 @@ export default function Alerts() {
     if (filter === "Caution") return alert.severity === "CAUTION";
     return true;
   });
+
+  const filterOptions = [
+    { id: "All", label: t("alerts.filters.all") || "All" },
+    { id: "Active", label: t("alerts.filters.active") || "Active" },
+    { id: "Critical", label: t("alerts.filters.critical") || "Critical" },
+    { id: "Warning", label: t("alerts.filters.warning") || "Warning" },
+    { id: "Caution", label: t("alerts.filters.caution") || "Caution" },
+    { id: "Acknowledged", label: t("alerts.filters.acknowledged") || "Acknowledged" },
+  ];
 
   return (
     <div className="alerts-page">
@@ -42,15 +54,13 @@ export default function Alerts() {
 
         <div className="alerts-page-header">
           <div>
-            <h1>Alert Center</h1>
-            <p>
-              Everything the platform pushed to you, with the evidence behind it.
-            </p>
+            <h1>{t("alerts.title")}</h1>
+            <p>{t("alerts.subtitle")}</p>
           </div>
 
           {state.dataSources.degraded && (
             <div className="alerts-degraded-state" role="status">
-              {state.dataSources.message} Some recommendations may have reduced confidence.
+              {state.dataSources.message} {t("dashboard.degradedSuffix")}
             </div>
           )}
 
@@ -63,7 +73,7 @@ export default function Alerts() {
             }}
           >
             <Bell size={15} />
-            {replayed ? "Hazard alert replayed" : "Replay hazard push alert"}
+            {replayed ? t("alerts.replayedPush") : t("alerts.replayPush")}
           </button>
         </div>
 
@@ -72,17 +82,17 @@ export default function Alerts() {
         <div className="alert-summary">
 
           <div className="summary-box critical-summary">
-            <span>CRITICAL</span>
+            <span>{t("alerts.severity.critical")}</span>
             <strong>{state.alerts.filter((alert) => alert.severity === "CRITICAL").length}</strong>
           </div>
 
           <div className="summary-box warning-summary">
-            <span>WARNING</span>
+            <span>{t("alerts.severity.warning")}</span>
             <strong>{state.alerts.filter((alert) => alert.severity === "WARNING").length}</strong>
           </div>
 
           <div className="summary-box info-summary">
-            <span>CAUTION</span>
+            <span>{t("alerts.severity.caution")}</span>
             <strong>{state.alerts.filter((alert) => alert.severity === "CAUTION").length}</strong>
           </div>
 
@@ -117,12 +127,12 @@ export default function Alerts() {
           <div className="featured-data">
 
             <div>
-              <span>DISTANCE TO IMBL</span>
+              <span>{t("alerts.distanceToImbl")}</span>
               <strong>{imbl.distanceKm} km</strong>
             </div>
 
             <div>
-              <span>DIRECTION</span>
+              <span>{t("alerts.direction")}</span>
               <strong>South-west</strong>
             </div>
 
@@ -156,11 +166,11 @@ export default function Alerts() {
 
             <button className="return-safe" onClick={() => { selectRoute("safer", "IMBL safety"); navigate("/routes"); }}>
               <Compass size={15} />
-              Return to Safe Route
+              {t("alerts.returnSafeRoute")}
             </button>
 
             <button className="show-map" onClick={() => navigate("/map?focus=imbl")}>
-              Show IMBL on map
+              {t("alerts.showImblMap")}
             </button>
 
             <span className="simulate-text">
@@ -184,13 +194,13 @@ export default function Alerts() {
 
         <div className="alert-filters">
 
-          {["All", "Active", "Critical", "Warning", "Caution", "Acknowledged"].map((item) => (
+          {filterOptions.map((item) => (
             <button
-              className={`filter ${filter === item ? "active" : ""}`}
-              key={item}
-              onClick={() => setFilter(item)}
+              className={`filter ${filter === item.id ? "active" : ""}`}
+              key={item.id}
+              onClick={() => setFilter(item.id)}
             >
-              {item}
+              {item.label}
             </button>
           ))}
 
@@ -210,10 +220,11 @@ export default function Alerts() {
               location={alert.location}
               confidence={`${state.risk.confidence.score}%`}
               sources={alert.sources}
-              button={alert.type === "IMBL" ? "View IMBL" : "View map"}
+              button={alert.type === "IMBL" ? t("alerts.viewImbl") : t("alerts.viewMap")}
               alertId={alert.id}
               alertState={alert}
               read={alert.read}
+              t={t}
               onAcknowledge={acknowledgeAlert}
               onDismiss={dismissAlert}
               onAction={() => {
@@ -250,6 +261,7 @@ function AlertRow({
   alertState,
   read = false,
   hidden = false,
+  t,
   onAcknowledge,
   onDismiss,
   onAction,
@@ -257,6 +269,7 @@ function AlertRow({
   if (hidden) return null;
 
   const isAcknowledged = alertState?.status === "acknowledged" || acknowledged;
+  const translatedType = t ? (t(`alerts.severity.${(type || "caution").toLowerCase()}`) || type) : type;
 
   return (
     <article className={`alert-row ${type.toLowerCase()}`}>
@@ -268,20 +281,20 @@ function AlertRow({
           <span className="status-dot"></span>
 
           <span className="row-type">
-            {type}
+            {translatedType}
           </span>
 
           <span className="row-tag">
             {tag}
           </span>
 
-          {!read && <span className="acknowledged">UNREAD</span>}
+          {!read && <span className="acknowledged">{t ? t("alerts.unread") : "UNREAD"}</span>}
 
           <h3>{title}</h3>
 
           {isAcknowledged && (
             <span className="acknowledged">
-              ✓ Acknowledged
+              ✓ {t ? t("alerts.acknowledged") : "Acknowledged"}
             </span>
           )}
 
@@ -345,11 +358,11 @@ function AlertRow({
           onClick={() => alertId && onAcknowledge(alertId)}
           disabled={isAcknowledged}
         >
-          {isAcknowledged ? "Acknowledged" : "Acknowledge"}
+          {isAcknowledged ? (t ? t("alerts.acknowledged") : "Acknowledged") : (t ? t("alerts.acknowledge") : "Acknowledge")}
         </button>
 
         <button className="row-ack" onClick={() => onDismiss(alertId)}>
-          Dismiss
+          {t ? t("alerts.dismiss") : "Dismiss"}
         </button>
 
       </div>
