@@ -2,6 +2,7 @@ import "./Intelligence.css";
 import Sidebar from "../components/Sidebar";
 import MarineLeafletMap from "../components/MarineLeafletMap";
 import { useAppData } from "../state/useAppData";
+
 const evidenceItems = [
   {
     type: "good",
@@ -26,16 +27,14 @@ export default function Intelligence() {
   const { risk, dataSources } = state;
 
   return (
-    <>
-    <Sidebar />
+    <div className="intelligence-page">
+      <Sidebar />
 
-    <main className="intelligence-page">
-      <div className="intelligence-content">
+      <main className="intelligence-content">
 
         {/* ================= HEADER ================= */}
 
         <header className="intelligence-header">
-
           <div className="intelligence-heading">
             <h1>Maritime Intelligence</h1>
 
@@ -47,11 +46,12 @@ export default function Intelligence() {
           </div>
 
           <div className="intelligence-status">
-
             <div className="intelligence-status-top">
               <span className="fresh-badge">
                 <span className="fresh-dot"></span>
-                {risk.confidence.level === "HIGH" ? "FRESH" : "CHECK DATA"}
+                {risk.confidence.level === "HIGH"
+                  ? "FRESH"
+                  : "CHECK DATA"}
               </span>
 
               <span className="updated-text">
@@ -61,13 +61,16 @@ export default function Intelligence() {
 
             <div className="intelligence-tags">
               <span>SATELLITE DEMO DATA</span>
-              <span>AIS: {dataSources.sources.find((source) => source.id === "ais")?.status.toUpperCase()}</span>
+
+              <span>
+                AIS:{" "}
+                {dataSources.sources
+                  .find((source) => source.id === "ais")
+                  ?.status.toUpperCase()}
+              </span>
             </div>
-
           </div>
-
         </header>
-
 
         {/* ================= MAIN GRID ================= */}
 
@@ -78,7 +81,6 @@ export default function Intelligence() {
           <section className="sar-card">
 
             <div className="sar-header">
-
               <div className="sar-title">
                 <span className="sar-icon">⌁</span>
 
@@ -90,24 +92,23 @@ export default function Intelligence() {
               <span className="sar-meta">
                 VV polarisation · 10 m
               </span>
-
             </div>
 
-
             {/* MAP */}
-            <div className="sar-map">
-  <MarineLeafletMap
-    fishing={false}
-    vesselsVisible={true}
-    hazardsVisible={true}
-    ocean={false}
-    imbl={false}
-    route={false}
-  />
-</div>
 
+            <div className="sar-map">
+              <MarineLeafletMap
+                fishing={false}
+                vesselsVisible={true}
+                hazardsVisible={true}
+                ocean={false}
+                imbl={false}
+                route={false}
+              />
+            </div>
 
             {/* MAP LEGEND */}
+
             <div className="sar-footer">
 
               <div className="sar-legend">
@@ -124,21 +125,17 @@ export default function Intelligence() {
 
               </div>
 
-
               <div className="sar-source-tags">
-
                 <span className="source-icon">▤</span>
 
                 <span>SAR</span>
                 <span>SATELLITE</span>
                 <span>AIS</span>
-
               </div>
 
             </div>
 
           </section>
-
 
           {/* ================= RIGHT COLUMN ================= */}
 
@@ -164,7 +161,6 @@ export default function Intelligence() {
 
               </div>
 
-
               {/* VALUES */}
 
               <div className="detection-values">
@@ -176,7 +172,9 @@ export default function Intelligence() {
 
                 <div className="detection-value">
                   <span>MARINE RISK</span>
-                  <strong>{risk.score} / 100 · {risk.severity}</strong>
+                  <strong>
+                    {risk.score} / 100 · {risk.severity}
+                  </strong>
                 </div>
 
                 <div className="detection-value">
@@ -191,11 +189,12 @@ export default function Intelligence() {
 
                 <div className="detection-value">
                   <span>CENTROID</span>
-                  <strong>20.0200° N, 70.8600° E</strong>
+                  <strong>
+                    20.0200° N, 70.8600° E
+                  </strong>
                 </div>
 
               </div>
-
 
               {/* EVIDENCE CONFIDENCE */}
 
@@ -203,7 +202,10 @@ export default function Intelligence() {
 
                 <div className="confidence-header">
                   <span>EVIDENCE CONFIDENCE</span>
-                  <strong>{risk.confidence.score}%</strong>
+
+                  <strong>
+                    {risk.confidence.score}%
+                  </strong>
                 </div>
 
                 <div className="confidence-track">
@@ -212,29 +214,56 @@ export default function Intelligence() {
 
               </div>
 
-              <div className="evidence-confidence">
-                <div className="confidence-header">
-                  <span>RECOMMENDATION</span>
-                  <strong>{risk.status}</strong>
-                </div>
-                <p>{risk.recommendation}</p>
-              </div>
+              {/* RECOMMENDATION */}
 
               <div className="evidence-confidence">
+
+                <div className="confidence-header">
+                  <span>RECOMMENDATION</span>
+
+                  <strong>{risk.status}</strong>
+                </div>
+
+                <p>{risk.recommendation}</p>
+
+              </div>
+
+              {/* CONTRIBUTING FACTORS */}
+
+              <div className="evidence-confidence">
+
                 <div className="confidence-header">
                   <span>CONTRIBUTING FACTORS</span>
-                  <strong>{risk.factors.filter((factor) => factor.points > 0).length}</strong>
+
+                  <strong>
+                    {
+                      risk.factors.filter(
+                        (factor) => factor.points > 0
+                      ).length
+                    }
+                  </strong>
                 </div>
-                {risk.factors.filter((factor) => factor.points > 0).map((factor) => (
-                  <div className="evidence-row" key={factor.name}>
-                    <span className="evidence-status">·</span>
-                    <span className="evidence-text">{factor.name} · {factor.evidence}</span>
-                  </div>
-                ))}
+
+                {risk.factors
+                  .filter((factor) => factor.points > 0)
+                  .map((factor) => (
+                    <div
+                      className="evidence-row"
+                      key={factor.name}
+                    >
+                      <span className="evidence-status">
+                        ·
+                      </span>
+
+                      <span className="evidence-text">
+                        {factor.name} · {factor.evidence}
+                      </span>
+                    </div>
+                  ))}
+
               </div>
 
             </div>
-
 
             {/* ================= EVIDENCE CARD ================= */}
 
@@ -249,7 +278,6 @@ export default function Intelligence() {
                 <h2>Evidence</h2>
 
               </div>
-
 
               <div className="evidence-list">
 
@@ -266,7 +294,9 @@ export default function Intelligence() {
                           : "evidence-status"
                       }
                     >
-                      {item.type === "warning" ? "!" : "✓"}
+                      {item.type === "warning"
+                        ? "!"
+                        : "✓"}
                     </span>
 
                     <span className="evidence-text">
@@ -278,13 +308,12 @@ export default function Intelligence() {
 
               </div>
 
-
               {/* DISCLAIMER */}
 
               <div className="intelligence-disclaimer">
-                Potential association only. This analysis does not establish
-                that any vessel caused the observed anomaly and requires
-                field verification.
+                Potential association only. This analysis does not
+                establish that any vessel caused the observed anomaly
+                and requires field verification.
               </div>
 
             </div>
@@ -293,9 +322,7 @@ export default function Intelligence() {
 
         </div>
 
-      </div>
-    </main>
-    </>
-);
-
+      </main>
+    </div>
+  );
 }

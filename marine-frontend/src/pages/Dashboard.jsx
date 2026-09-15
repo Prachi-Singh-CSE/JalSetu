@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import MarineLeafletMap from "../components/MarineLeafletMap";
 import IMBLSafetyWarning from "../components/IMBLSafetyWarning";
@@ -31,13 +30,13 @@ function Dashboard() {
   } = useAppData();
 
   const {
-  marine,
-  risk,
-  alerts,
-  dataSources,
-  routes,
-  selectedRouteId,
-} = state;
+    marine,
+    risk,
+    alerts,
+    dataSources,
+    routes,
+    selectedRouteId,
+  } = state;
 
   /*
    * Use the shared proactive alerts from AppDataContext.
@@ -65,35 +64,35 @@ function Dashboard() {
       );
     });
 
-    const routeList = Array.isArray(routes)
-  ? routes
-  : routes?.options || [];
+  const routeList = Array.isArray(routes)
+    ? routes
+    : routes?.options || [];
 
-const selectedRoute =
-  routeList.find((route) => route.id === selectedRouteId) ||
-  routeList.find((route) => route.id === "safer") ||
-  null;
+  const selectedRoute =
+    routeList.find((route) => route.id === selectedRouteId) ||
+    routeList.find((route) => route.id === "safer") ||
+    null;
 
-const routeConfidence = risk?.confidence?.score ?? 0;
+  const routeConfidence = risk?.confidence?.score ?? 0;
 
-const riskLabel =
-  risk?.severity ||
-  (risk?.score >= 75
-    ? "SEVERE"
-    : risk?.score >= 50
-    ? "HIGH"
-    : risk?.score >= 25
-    ? "MODERATE"
-    : "LOW");
+  const riskLabel =
+    risk?.severity ||
+    (risk?.score >= 75
+      ? "SEVERE"
+      : risk?.score >= 50
+      ? "HIGH"
+      : risk?.score >= 25
+      ? "MODERATE"
+      : "LOW");
 
   const safetyStatus =
-  riskLabel === "SEVERE"
-    ? t("dashboard.safetyHighRisk")
-    : riskLabel === "HIGH"
-    ? t("dashboard.safetyCaution")
-    : riskLabel === "MODERATE"
-    ? t("dashboard.safetyCaution")
-    : t("dashboard.safetySafe");
+    riskLabel === "SEVERE"
+      ? t("dashboard.safetyHighRisk")
+      : riskLabel === "HIGH"
+      ? t("dashboard.safetyCaution")
+      : riskLabel === "MODERATE"
+      ? t("dashboard.safetyCaution")
+      : t("dashboard.safetySafe");
 
   /*
    * Decide where the alert's existing View button should go.
@@ -161,9 +160,7 @@ const riskLabel =
           </div>
         </section>
 
-        {/* IMBL boundary warning — local, on-app, and (once the vessel
-            has stayed inside the buffer past the dwell threshold)
-            visually distinct from the authority-dashboard escalation */}
+        {/* IMBL boundary warning */}
         <IMBLSafetyWarning />
 
         {/* Situation cards */}
@@ -211,7 +208,6 @@ const riskLabel =
 
         </section>
 
-
         {/* Degraded data state */}
         {dataSources.degraded && (
           <div
@@ -227,54 +223,6 @@ const riskLabel =
             </span>
           </div>
         )}
-
-{/* Data source health */}
-<section className="dashboard-panel data-health-panel">
-  <div className="panel-header">
-    <div>
-      <div className="panel-label">
-        <ShieldCheck size={13} />
-        {t("dashboard.dataSourceHealth")}
-      </div>
-
-      <h2>
-        {dataSources.confidenceLevel} {t("dashboard.confidenceWord")} ·{" "}
-        {dataSources.healthy}/{dataSources.total} {t("dashboard.available").toLowerCase()}
-      </h2>
-    </div>
-
-    <span
-      className={`data-health-status ${
-        dataSources.degraded ? "degraded" : "healthy"
-      }`}
-    >
-      {dataSources.degraded ? t("dashboard.degraded") : t("dashboard.available")}
-    </span>
-  </div>
-
-  <div className="data-health-list">
-    {dataSources.sources.map((source) => (
-      <div className="data-health-row" key={source.id}>
-        <div className="data-health-name">
-          <span
-            className={`source-status-dot ${source.status.toLowerCase()}`}
-          />
-          <span>{source.name}</span>
-        </div>
-
-        <span
-          className={`source-status ${source.status.toLowerCase()}`}
-        >
-          {source.status}
-        </span>
-
-        <span className="data-health-time">
-          {source.lastUpdated}
-        </span>
-      </div>
-    ))}
-  </div>
-</section>
 
         {/* Main dashboard */}
         <section className="dashboard-grid">
@@ -317,7 +265,6 @@ const riskLabel =
 
           </div>
 
-
           {/* Alerts */}
           <div className="dashboard-panel alerts-panel">
 
@@ -339,7 +286,6 @@ const riskLabel =
               </span>
 
             </div>
-
 
             {activeAlerts.length > 0 ? (
 
@@ -399,7 +345,6 @@ const riskLabel =
 
             )}
 
-
             <button
               className="view-alerts"
               onClick={() => navigate("/alerts")}
@@ -411,7 +356,6 @@ const riskLabel =
           </div>
 
         </section>
-
 
         {/* Bottom cards */}
         <section className="bottom-grid">
@@ -460,7 +404,6 @@ const riskLabel =
 
           </div>
 
-
           <div className="dashboard-panel route-panel">
 
             <div className="panel-label">
@@ -469,8 +412,9 @@ const riskLabel =
             </div>
 
             <h2>
-  {selectedRoute?.name || t("dashboard.defaultRouteName")}
-</h2>
+              {selectedRoute?.name ||
+                t("dashboard.defaultRouteName")}
+            </h2>
 
             <div className="route-info">
 
@@ -479,10 +423,11 @@ const riskLabel =
 
                 <div>
                   <span>{t("dashboard.estTime")}</span>
-                  <strong>{selectedRoute?.estimatedTime || "—"}</strong>
+                  <strong>
+                    {selectedRoute?.estimatedTime || "—"}
+                  </strong>
                 </div>
               </div>
-
 
               <div className="route-stat">
                 <Navigation size={15} />
@@ -490,10 +435,10 @@ const riskLabel =
                 <div>
                   <span>{t("dashboard.distance")}</span>
                   <strong>
-  {selectedRoute?.distanceKm != null
-    ? `${selectedRoute.distanceKm} km`
-    : "—"}
-</strong>
+                    {selectedRoute?.distanceKm != null
+                      ? `${selectedRoute.distanceKm} km`
+                      : "—"}
+                  </strong>
                 </div>
               </div>
 
@@ -516,7 +461,6 @@ const riskLabel =
     </div>
   );
 }
-
 
 /* ============================================================
    WEATHER CARD
@@ -548,7 +492,6 @@ function WeatherCard({
     </div>
   );
 }
-
 
 /* ============================================================
    ALERT

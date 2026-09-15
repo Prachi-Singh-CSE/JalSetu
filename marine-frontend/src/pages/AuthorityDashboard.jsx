@@ -10,43 +10,70 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-import Sidebar from "../components/Sidebar";
+import MarineLeafletMap from "../components/MarineLeafletMap";
 import { useAppData } from "../state/useAppData";
 import "./AuthorityDashboard.css";
 
 function AuthorityDashboard() {
   const navigate = useNavigate();
+
   const { state, acknowledgeAuthority } = useAppData();
-  const { authorityAlerts, dataSources, sosEvents, imblEscalations, alerts: proactiveAlerts } = state;
+
+  const {
+    authorityAlerts,
+    dataSources,
+    sosEvents,
+    imblEscalations,
+    alerts: proactiveAlerts,
+  } = state;
+
   const alerts = [
     ...authorityAlerts,
-    ...proactiveAlerts.filter((alert) => ["active", "read"].includes(alert.status)).map((alert) => ({
-      ...alert,
-      type: alert.type,
-      time: alert.timestamp,
-      severity: alert.severity.toLowerCase(),
-      status: alert.read ? "Read" : "Active",
-    })),
+
+    ...proactiveAlerts
+      .filter((alert) =>
+        ["active", "read"].includes(alert.status)
+      )
+      .map((alert) => ({
+        ...alert,
+        type: alert.type,
+        time: alert.timestamp,
+        severity: alert.severity.toLowerCase(),
+        status: alert.read ? "Read" : "Active",
+      })),
+
     ...sosEvents.map((event) => ({
       ...event,
       title: "Emergency SOS Alert",
-      location: event.location ? event.location.join(", ") : "Location unavailable",
+      type: "SOS",
+      location: event.location
+        ? event.location.join(", ")
+        : "Location unavailable",
       time: event.createdAt,
       status: event.acknowledgementStatus,
       severity: event.severity.toLowerCase(),
     })),
+
     ...imblEscalations,
   ];
-  const activeSOS = sosEvents.filter((event) => event.acknowledgementStatus !== "ACKNOWLEDGED").length;
-  const activeEscalations = imblEscalations.filter((event) => event.status !== "ACKNOWLEDGED").length;
+
+  const activeSOS = sosEvents.filter(
+    (event) =>
+      event.acknowledgementStatus !== "ACKNOWLEDGED"
+  ).length;
+
+  const activeEscalations = imblEscalations.filter(
+    (event) => event.status !== "ACKNOWLEDGED"
+  ).length;
 
   return (
     <div className="authority-page">
-      <Sidebar />
-
       <main className="authority-container">
 
-        {/* Header */}
+        {/* ====================================================
+            HEADER
+        ==================================================== */}
+
         <section className="authority-header">
           <div>
             <div className="authority-eyebrow">
@@ -57,18 +84,23 @@ function AuthorityDashboard() {
             <h1>Marine Intelligence Dashboard</h1>
 
             <p>
-              Monitor demo emergency situations, maritime boundaries,
-              hazards and marine intelligence.
+              Monitor demo emergency situations, maritime
+              boundaries, hazards and marine intelligence.
             </p>
           </div>
 
           <div className="system-status">
-            <span className="status-dot"></span>
-              Demo systems · {dataSources.healthy}/{dataSources.total} sources healthy
+            <span className="status-dot" />
+
+            Demo systems · {dataSources.healthy}/
+            {dataSources.total} sources healthy
           </div>
         </section>
 
-        {/* Stats */}
+        {/* ====================================================
+            STATS
+        ==================================================== */}
+
         <section className="authority-stats">
 
           <div className="authority-stat-card critical">
@@ -114,215 +146,261 @@ function AuthorityDashboard() {
 
             <div>
               <span>Data Sources</span>
-              <strong>{dataSources.healthy}/{dataSources.total}</strong>
-              <small>{dataSources.total - dataSources.healthy} source degraded</small>
+
+              <strong>
+                {dataSources.healthy}/{dataSources.total}
+              </strong>
+
+              <small>
+                {dataSources.total - dataSources.healthy}{" "}
+                source degraded
+              </small>
             </div>
           </div>
 
         </section>
 
-        {/* Main grid */}
+        {/* ====================================================
+            MAIN GRID
+        ==================================================== */}
+
         <section className="authority-grid">
 
-          {/* Map */}
+          {/* ==================================================
+              MARINE SITUATION MAP
+          ================================================== */}
+
           <div className="authority-card map-card">
 
             <div className="card-heading">
               <div>
                 <h2>Marine Situation · Demo</h2>
-                <p>Active incidents and monitored vessels</p>
+
+                <p>
+                  Active incidents and monitored vessels
+                </p>
               </div>
 
               <span className="live-badge">
-                <span></span>
+                <span />
                 DEMO
               </span>
             </div>
 
             <div className="authority-map">
-
-              <div className="map-grid"></div>
-
-              {/* Fishing zone */}
-              <div className="map-zone zone-one">
-                <span>PFZ</span>
-              </div>
-
-              {/* Risk zone */}
-              <div className="map-zone risk-zone">
-                <span>RISK</span>
-              </div>
-
-              {/* Vessel markers */}
-              <div className="vessel vessel-1">
-                <Ship size={18} />
-              </div>
-
-              <div className="vessel vessel-2">
-                <Ship size={18} />
-              </div>
-
-              <div className="vessel vessel-3">
-                <Ship size={18} />
-              </div>
-
-              {/* SOS marker */}
-              <div className="sos-marker">
-                <ShieldAlert size={20} />
-              </div>
-
-              {/* IMBL line */}
-              <div className="imbl-line">
-                IMBL
-              </div>
-
-              {/* Map labels */}
-              <div className="map-label arabian">
-                Arabian Sea
-              </div>
-
-              <div className="map-label sector">
-                AR-14
-              </div>
-
-              <div className="map-controls">
-                <button>PFZ</button>
-                <button>Risk</button>
-                <button>Vessels</button>
-                <button>Hazards</button>
-              </div>
-
+              <MarineLeafletMap
+                fishing={true}
+                vesselsVisible={true}
+                hazardsVisible={true}
+                ocean={true}
+                route={true}
+              />
             </div>
 
             <div className="map-legend">
+
               <span>
-                <i className="legend-sos"></i>
+                <i className="legend-sos" />
                 SOS
               </span>
 
               <span>
-                <i className="legend-vessel"></i>
+                <i className="legend-vessel" />
                 Vessel
               </span>
 
               <span>
-                <i className="legend-pfz"></i>
+                <i className="legend-pfz" />
                 PFZ
               </span>
 
               <span>
-                <i className="legend-risk"></i>
+                <i className="legend-risk" />
                 Risk Zone
               </span>
 
               <span>
-                <i className="legend-imbl"></i>
+                <i className="legend-imbl" />
                 IMBL
               </span>
+
             </div>
 
           </div>
 
-          {/* Alerts */}
+          {/* ==================================================
+              PRIORITY ALERTS
+          ================================================== */}
+
           <div className="authority-card alerts-card">
 
             <div className="card-heading">
+
               <div>
                 <h2>Priority Alerts</h2>
-                <p>Situations requiring authority attention</p>
+
+                <p>
+                  Situations requiring authority attention
+                </p>
               </div>
 
               <span className="alert-count">
                 {alerts.length}
               </span>
+
             </div>
 
             <div className="authority-alert-list">
 
-              {alerts.map((alert) => (
-                <div
-                  className={`authority-alert ${alert.severity}`}
-                  key={alert.id}
-                >
+              {alerts.length === 0 ? (
 
-                  <div className="alert-icon">
-                    {alert.type === "SOS" ? (
-                      <ShieldAlert size={20} />
-                    ) : alert.type === "IMBL" ? (
-                      <AlertTriangle size={20} />
-                    ) : (
-                      <Ship size={20} />
-                    )}
-                  </div>
+                <div className="authority-empty-state">
+                  <CheckCircle size={20} />
 
-                  <div className="alert-content">
+                  <span>
+                    No active priority alerts.
+                  </span>
+                </div>
 
-                    <div className="alert-top">
-                      <strong>{alert.title}</strong>
+              ) : (
 
-                      <span className="severity-label">
-                        {alert.severity}
-                      </span>
+                alerts.map((alert) => (
+
+                  <div
+                    className={`authority-alert ${alert.severity}`}
+                    key={alert.id}
+                  >
+
+                    <div className="alert-icon">
+
+                      {alert.type === "SOS" ? (
+                        <ShieldAlert size={20} />
+                      ) : alert.type === "IMBL" ? (
+                        <AlertTriangle size={20} />
+                      ) : (
+                        <Ship size={20} />
+                      )}
+
                     </div>
 
-                    <div className="alert-meta">
-                      <span>
-                        <MapPin size={13} />
-                        {alert.location}
-                      </span>
+                    <div className="alert-content">
 
-                      <span>
-                        <Clock size={13} />
-                        {alert.time}
-                      </span>
+                      <div className="alert-top">
 
-                      {alert.id && <span>Incident {alert.id}</span>}
-                    </div>
+                        <strong>
+                          {alert.title}
+                        </strong>
 
-                    <div className="alert-bottom">
+                        <span className="severity-label">
+                          {alert.severity}
+                        </span>
 
-                      <span className="alert-status">
-                        {["Acknowledged", "ACKNOWLEDGED"].includes(alert.status) && (
-                          <CheckCircle size={14} />
+                      </div>
+
+                      <div className="alert-meta">
+
+                        <span>
+                          <MapPin size={13} />
+                          {alert.location}
+                        </span>
+
+                        <span>
+                          <Clock size={13} />
+                          {alert.time}
+                        </span>
+
+                        {alert.id && (
+                          <span>
+                            Incident {alert.id}
+                          </span>
                         )}
 
-                        {alert.status}
-                      </span>
+                      </div>
 
-                      {!(["Acknowledged", "ACKNOWLEDGED"].includes(alert.status)) && (
+                      <div className="alert-bottom">
+
+                        <span className="alert-status">
+
+                          {[
+                            "Acknowledged",
+                            "ACKNOWLEDGED",
+                          ].includes(alert.status) && (
+                            <CheckCircle size={14} />
+                          )}
+
+                          {alert.status}
+
+                        </span>
+
+                        {![
+                          "Acknowledged",
+                          "ACKNOWLEDGED",
+                        ].includes(alert.status) && (
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              acknowledgeAuthority(
+                                alert.id
+                              )
+                            }
+                          >
+                            Acknowledge
+                          </button>
+
+                        )}
+
+                        {alert.type === "SOS" && (
+                          <span className="alert-status">
+                            NOT TRANSMITTED
+                          </span>
+                        )}
+
+                        {alert.locationStatus && (
+                          <span className="alert-status">
+                            Location:{" "}
+                            {alert.locationStatus}
+                          </span>
+                        )}
+
+                        {alert.recommendedAction && (
+                          <span className="alert-status">
+                            Recommended:{" "}
+                            {alert.recommendedAction}
+                          </span>
+                        )}
+
                         <button
-                          onClick={() => acknowledgeAuthority(alert.id)}
+                          type="button"
+                          onClick={() =>
+                            navigate(
+                              alert.mapPath ||
+                                (alert.type === "IMBL"
+                                  ? "/map?focus=imbl"
+                                  : "/map?focus=hazard")
+                            )
+                          }
                         >
-                          Acknowledge
+                          View Map
                         </button>
-                      )}
 
-                      {alert.type === "SOS" && (
-                        <span className="alert-status">NOT TRANSMITTED</span>
-                      )}
-
-                      {alert.locationStatus && (
-                        <span className="alert-status">Location: {alert.locationStatus}</span>
-                      )}
-
-                      {alert.recommendedAction && (
-                        <span className="alert-status">Recommended: {alert.recommendedAction}</span>
-                      )}
-
-                      <button onClick={() => navigate(alert.mapPath || (alert.type === "IMBL" ? "/map?focus=imbl" : "/map?focus=hazard"))}>
-                        View Map
-                      </button>
+                      </div>
 
                     </div>
 
                   </div>
 
-                </div>
-              ))}
+                ))
+
+              )}
 
             </div>
 
-            <button className="view-all-alerts" onClick={() => navigate("/alerts")}>
+            <button
+              type="button"
+              className="view-all-alerts"
+              onClick={() => navigate("/alerts")}
+            >
               View all alerts
             </button>
 
@@ -330,74 +408,148 @@ function AuthorityDashboard() {
 
         </section>
 
-        {/* Lower cards */}
+        {/* ====================================================
+            LOWER GRID
+        ==================================================== */}
+
         <section className="authority-lower-grid">
 
-          {/* IMBL */}
+          {/* ==================================================
+              IMBL MONITORING
+          ================================================== */}
+
           <div className="authority-card">
 
             <div className="card-heading">
+
               <div>
                 <h2>IMBL Boundary Monitoring</h2>
                 <p>Recent boundary activity</p>
               </div>
 
               <ShieldAlert size={21} />
+
             </div>
 
             <div className="monitoring-row">
+
               <div>
-                <strong>{authorityAlerts.filter((alert) => alert.type === "IMBL").length + imblEscalations.length}</strong>
+                <strong>
+                  {
+                    authorityAlerts.filter(
+                      (alert) => alert.type === "IMBL"
+                    ).length +
+                      imblEscalations.length
+                  }
+                </strong>
+
                 <span>Warnings</span>
               </div>
 
               <div>
-                <strong>{activeEscalations}</strong>
+                <strong>
+                  {activeEscalations}
+                </strong>
+
                 <span>Escalated</span>
               </div>
 
               <div>
-                <strong>{imblEscalations.filter((event) => event.severity === "CRITICAL" && event.status !== "ACKNOWLEDGED").length}</strong>
+                <strong>
+                  {
+                    imblEscalations.filter(
+                      (event) =>
+                        event.severity === "CRITICAL" &&
+                        event.status !== "ACKNOWLEDGED"
+                    ).length
+                  }
+                </strong>
+
                 <span>Critical</span>
               </div>
+
             </div>
 
             <div className="progress-section">
+
               <div className="progress-label">
                 <span>Boundary compliance</span>
                 <strong>96%</strong>
               </div>
 
               <div className="progress-bar">
-                <div style={{ width: "96%" }}></div>
+                <div style={{ width: "96%" }} />
               </div>
+
             </div>
 
           </div>
 
-          {/* Source health */}
+          {/* ==================================================
+              DATA SOURCE HEALTH
+          ================================================== */}
+
           <div className="authority-card">
 
             <div className="card-heading">
+
               <div>
                 <h2>Data Source Health</h2>
-                <p>Current intelligence availability</p>
+
+                <p>
+                  Current intelligence availability
+                </p>
               </div>
 
               <Radio size={21} />
+
             </div>
 
             <div className="source-list">
-              {dataSources.sources.map((source) => (
-                <div className={`source-row ${source.status === "STALE" || source.status === "UNAVAILABLE" ? "degraded" : ""}`} key={source.id}>
-                  <span>
-                    <i className={source.status === "STALE" || source.status === "UNAVAILABLE" ? "source-warning" : "source-online"}></i>
-                    {source.name}
-                  </span>
-                  <strong>{source.status}</strong>
-                  <small>{source.lastUpdated} · {source.message}</small>
-                </div>
-              ))}
+
+              {dataSources.sources.map((source) => {
+
+                const degraded =
+                  source.status === "STALE" ||
+                  source.status === "UNAVAILABLE";
+
+                return (
+
+                  <div
+                    className={`source-row ${
+                      degraded ? "degraded" : ""
+                    }`}
+                    key={source.id}
+                  >
+
+                    <span>
+
+                      <i
+                        className={
+                          degraded
+                            ? "source-warning"
+                            : "source-online"
+                        }
+                      />
+
+                      {source.name}
+
+                    </span>
+
+                    <strong>
+                      {source.status}
+                    </strong>
+
+                    <small>
+                      {source.lastUpdated} ·{" "}
+                      {source.message}
+                    </small>
+
+                  </div>
+
+                );
+
+              })}
 
             </div>
 

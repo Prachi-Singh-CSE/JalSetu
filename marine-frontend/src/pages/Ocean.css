@@ -1,5 +1,6 @@
 /* =========================================================
    SAMUDRA — OCEAN INTELLIGENCE
+   Sidebar-safe layout
    ========================================================= */
 
 .samudra-ocean-page {
@@ -20,19 +21,32 @@
     sans-serif;
 
   transform: none !important;
+  overflow-x: hidden;
 }
 
 
 /* =========================================================
    CONTENT
+   IMPORTANT:
+   Sidebar is 68px wide.
+   Content is shifted to the right by 68px.
    ========================================================= */
 
 .samudra-ocean-content {
-  width: 100%;
-  margin: 0;
-  padding: 16px 22px 18px;
+  width: calc(100% - 68px);
+  max-width: calc(100% - 68px);
+
+  min-height: 100vh;
+
+  margin-left: 68px;
+  margin-right: 0;
+
+  padding: 27px 32px 40px;
 
   background: #020d19;
+
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 
@@ -52,6 +66,12 @@
   padding-bottom: 12px;
 
   border-bottom: 1px solid #193546;
+
+  box-sizing: border-box;
+}
+
+.samudra-ocean-heading {
+  min-width: 0;
 }
 
 .samudra-ocean-heading h1 {
@@ -85,6 +105,8 @@
   gap: 7px;
 
   padding-top: 2px;
+
+  flex-shrink: 0;
 }
 
 .samudra-fresh {
@@ -137,12 +159,13 @@
 
 .samudra-ocean-layout {
   width: 100%;
+  min-width: 0;
 
   display: grid;
 
   grid-template-columns:
     minmax(0, 1.08fr)
-    minmax(360px, 1fr);
+    minmax(0, 1fr);
 
   gap: 11px;
 
@@ -151,6 +174,8 @@
   min-height: calc(100vh - 150px);
 
   align-items: stretch;
+
+  box-sizing: border-box;
 }
 
 
@@ -172,6 +197,8 @@
   border-radius: 9px;
 
   overflow: hidden;
+
+  box-sizing: border-box;
 }
 
 
@@ -248,6 +275,8 @@
 
   display: flex;
   flex-direction: column;
+
+  min-width: 0;
 }
 
 
@@ -278,6 +307,8 @@
   background: #0a1b2b;
 
   border-bottom: 1px solid #294758;
+
+  box-sizing: border-box;
 }
 
 .samudra-profile-row:last-child {
@@ -429,6 +460,8 @@
   border-radius: 9px;
 
   flex-shrink: 0;
+
+  box-sizing: border-box;
 }
 
 
@@ -443,6 +476,8 @@
   align-items: flex-start;
 
   gap: 10px;
+
+  min-width: 0;
 }
 
 .samudra-prediction-title {
@@ -451,6 +486,8 @@
   align-items: center;
 
   gap: 9px;
+
+  min-width: 0;
 }
 
 .samudra-prediction-title h2 {
@@ -481,6 +518,8 @@
   color: #43cbd4;
 
   font-size: 12px;
+
+  white-space: nowrap;
 }
 
 
@@ -499,6 +538,7 @@
 }
 
 .samudra-value-box {
+  min-width: 0;
   min-height: 66px;
 
   display: flex;
@@ -605,6 +645,13 @@
   font-size: 13px;
 
   cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.samudra-reasoning-button:hover {
+  background: #0d2333;
+  border-color: #245266;
 }
 
 .samudra-reasoning-button span {
@@ -682,6 +729,8 @@
 
   display: flex;
   flex-direction: column;
+
+  box-sizing: border-box;
 }
 
 
@@ -749,6 +798,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-around;
+
+  min-width: 0;
 }
 
 .samudra-chart-row {
@@ -764,6 +815,8 @@
   align-items: center;
 
   gap: 8px;
+
+  min-width: 0;
 }
 
 .samudra-chart-date {
@@ -781,6 +834,8 @@
   background: #102536;
 
   border-radius: 2px;
+
+  overflow: hidden;
 }
 
 .samudra-chart-observed {
@@ -809,6 +864,8 @@
   font-size: 12px;
 
   text-align: right;
+
+  white-space: nowrap;
 }
 
 
@@ -886,13 +943,72 @@
 
 
 /* =========================================================
-   RESPONSIVE
+   TABLET
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
+
+  .samudra-ocean-content {
+    padding: 25px 24px 34px;
+  }
 
   .samudra-ocean-layout {
     grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .samudra-profile-card {
+    height: auto;
+    min-height: 500px;
+  }
+
+  .samudra-ocean-right {
+    height: auto;
+  }
+
+  .samudra-chart-card {
+    min-height: 320px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   Sidebar is hidden by Sidebar.css at <= 800px.
+   Therefore remove the 68px desktop offset.
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .samudra-ocean-content {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin-left: 0 !important;
+
+    min-height: calc(100vh - 56px);
+
+    padding: 76px 20px 30px;
+  }
+
+  .samudra-ocean-header {
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+  .samudra-ocean-status {
+    width: 100%;
+
+    flex-wrap: wrap;
+
+    padding-top: 0;
+  }
+
+  .samudra-ocean-layout {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
 
     min-height: auto;
   }
@@ -908,23 +1024,37 @@
   .samudra-chart-card {
     min-height: 320px;
   }
-
-  .samudra-ocean-header {
-    flex-direction: column;
-
-    gap: 10px;
-  }
-
-  .samudra-ocean-status {
-    flex-wrap: wrap;
-  }
 }
 
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
 
 @media (max-width: 600px) {
 
   .samudra-ocean-content {
-    padding: 10px;
+    padding: 70px 10px 24px;
+  }
+
+  .samudra-ocean-heading h1 {
+    font-size: 24px;
+  }
+
+  .samudra-ocean-heading p {
+    font-size: 12px;
+  }
+
+  .samudra-ocean-status {
+    gap: 5px;
+
+    flex-wrap: wrap;
+  }
+
+  .samudra-fresh,
+  .samudra-updated,
+  .samudra-tag {
+    font-size: 10px;
   }
 
   .samudra-value-grid {
@@ -933,8 +1063,61 @@
 
   .samudra-profile-row {
     grid-template-columns:
-      48px
+      55px
+      minmax(0, 1fr)
+      auto;
+
+    gap: 8px;
+
+    padding: 9px;
+  }
+
+  .samudra-depth {
+    font-size: 13px;
+  }
+
+  .samudra-type {
+    font-size: 10px;
+
+    padding: 4px 6px;
+  }
+
+  .samudra-profile-values {
+    font-size: 11px;
+  }
+
+  .samudra-chart-row {
+    grid-template-columns:
+      40px
+      minmax(0, 1fr)
+      65px;
+
+    gap: 6px;
+  }
+
+  .samudra-chart-value {
+    font-size: 10px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+  .samudra-ocean-content {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .samudra-profile-row {
+    grid-template-columns:
+      45px
       minmax(0, 1fr);
+
+    min-height: 82px;
   }
 
   .samudra-type {
@@ -943,10 +1126,14 @@
     justify-self: start;
   }
 
+  .samudra-prediction-header {
+    flex-direction: column;
+  }
+
   .samudra-chart-row {
     grid-template-columns:
-      38px
+      36px
       minmax(0, 1fr)
-      60px;
+      55px;
   }
 }

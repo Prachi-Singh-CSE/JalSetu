@@ -61,7 +61,10 @@ export default function FloatingSOS() {
     setFlow("location");
     record(state.location.position, "DEMO_FALLBACK");
   };
-
+const resetSOS = () => {
+  setFlow("normal");
+  setPressed(false);
+};
   return (
     <div className="floating-sos" aria-live="polite">
       {flow === "normal" && (
@@ -106,7 +109,10 @@ export default function FloatingSOS() {
         <div className="floating-sos-panel" role="status">
           <strong>{acknowledged ? "SOS acknowledged by authority" : "SOS locally recorded"}</strong>
           <p>Transmission status: NOT TRANSMITTED. Incident ID: {state.sosEvents.at(-1)?.id || "pending"}</p>
-          <button onClick={() => navigate("/authority")}>View authority dashboard</button>
+          <div className="floating-sos-actions">
+      <button onClick={resetSOS}>RESET SOS</button>
+    </div>
+          
         </div>
       )}
     </div>

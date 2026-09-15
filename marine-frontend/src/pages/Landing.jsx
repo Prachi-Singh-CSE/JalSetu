@@ -194,13 +194,6 @@ function Landing() {
               onClick={() => navigate("/login/authority")}
             />
 
-            <PortalOption
-              icon={<SlidersHorizontal size={19} />}
-              title="Regulator / Admin"
-              description="Sector analytics, compliance reports and data-source governance."
-              onClick={() => navigate("/login/regulator")}
-            />
-
             {/* Demo dataset */}
             <div className="dataset-card">
 

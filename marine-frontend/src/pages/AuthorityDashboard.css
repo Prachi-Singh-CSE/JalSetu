@@ -782,3 +782,94 @@
     padding-right: 16px;
   }
 }
+
+/* ==================================================
+   AUTHORITY MAIN GRID
+   Map and Priority Alerts must have equal height
+================================================== */
+
+.authority-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(330px, 0.85fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* Same, smaller height for both cards */
+.authority-grid .map-card,
+.authority-grid .alerts-card {
+  min-width: 0;
+  height: 430px;
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Map fills the map box */
+.authority-grid .map-card .authority-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Priority Alerts box */
+.authority-grid .alerts-card {
+  overflow: hidden;
+}
+
+/* Only alerts scroll */
+.authority-grid .alerts-card .authority-alert-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 16px;
+  scrollbar-width: thin;
+}
+
+/* Bottom button stays visible */
+.authority-grid .alerts-card .view-all-alerts {
+  flex-shrink: 0;
+}
+
+
+/* ================================
+   TABLET / MOBILE
+================================ */
+
+@media (max-width: 1000px) {
+  .authority-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .authority-grid .map-card,
+  .authority-grid .alerts-card {
+    height: auto;
+    min-height: 0;
+  }
+
+  .authority-grid .map-card .authority-map {
+    height: 370px;
+    min-height: 370px;
+    flex: none;
+  }
+
+  .authority-grid .alerts-card .authority-alert-list {
+    max-height: 400px;
+    flex: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .authority-grid .map-card .authority-map {
+    height: 300px;
+    min-height: 300px;
+  }
+
+  .authority-grid .alerts-card .authority-alert-list {
+    max-height: 350px;
+  }
+}

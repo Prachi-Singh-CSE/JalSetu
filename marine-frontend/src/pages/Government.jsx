@@ -1,9 +1,12 @@
 import { useState } from "react";
+
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
+
 import { useAppData } from "../state/useAppData";
 import { useLanguage } from "../state/useLanguage";
 import { voiceLangFor } from "../i18n/voiceLang";
+
 import "./Government.css";
 
 const schemes = [
@@ -90,19 +93,21 @@ const questions = [
 export default function Support() {
   const { state, askWelfare } = useAppData();
   const { language, t } = useLanguage();
+
   const [selectedScheme, setSelectedScheme] = useState("diesel");
 
   return (
-    <>
-    <Sidebar />
+    <div className="support-page">
+      <Sidebar />
 
-    <main className="support-page">
-      <div className="support-content">
+      <main className="support-content">
 
         {/* PAGE HEADER */}
+
         <header className="support-header">
           <div>
             <h1>Government Support</h1>
+
             <p>
               Verified schemes for fishermen, matched to your profile and
               explained in plain language.
@@ -116,31 +121,39 @@ export default function Support() {
 
 
         {/* MAIN CONTENT */}
+
         <div className="support-layout">
 
           {/* ================= LEFT COLUMN ================= */}
+
           <section className="support-left">
 
-            {/* SCHEME ASSISTANT — reuses the same ChatWindow component as
-               the AI Assistant page (text + voice input, multi-turn
-               history, suggestion chips) instead of a bespoke single-turn
-               Q&A box. */}
+            {/* SCHEME ASSISTANT */}
+
             <div className="scheme-assistant card">
 
               <div className="assistant-heading">
-                <div className="assistant-icon">✦</div>
+
+                <div className="assistant-icon">
+                  ✦
+                </div>
 
                 <div>
                   <h2>Scheme Assistant</h2>
+
                   <p>
                     You can ask me about fishing subsidies, insurance and
                     government schemes.
                   </p>
                 </div>
+
               </div>
 
+
               {/* QUESTIONS */}
+
               <div className="question-list">
+
                 {questions.map((item, index) => (
                   <button
                     key={item}
@@ -152,7 +165,11 @@ export default function Support() {
                     {item}
                   </button>
                 ))}
+
               </div>
+
+
+              {/* CHAT */}
 
               <ChatWindow
                 compact
@@ -169,6 +186,7 @@ export default function Support() {
 
 
             {/* PROFILE CARD */}
+
             <div className="profile-card card">
 
               <h2>Your profile used for matching</h2>
@@ -208,12 +226,15 @@ export default function Support() {
 
 
           {/* ================= RIGHT COLUMN ================= */}
+
           <section className="support-right">
 
             <div className="scheme-list">
 
               {schemes.map((scheme) => {
-                const isSelected = selectedScheme === scheme.id;
+
+                const isSelected =
+                  selectedScheme === scheme.id;
 
                 return (
                   <div
@@ -224,6 +245,7 @@ export default function Support() {
                   >
 
                     {/* SCHEME TOP */}
+
                     <button
                       className="scheme-top"
                       onClick={() =>
@@ -233,18 +255,24 @@ export default function Support() {
                       }
                     >
 
-                      <div className="scheme-icon">♜</div>
+                      <div className="scheme-icon">
+                        ♜
+                      </div>
 
                       <div className="scheme-title-area">
+
                         <div className="scheme-title-line">
+
                           <h2>{scheme.title}</h2>
 
                           <span className="scheme-category">
                             {scheme.category}
                           </span>
+
                         </div>
 
                         <p>{scheme.subtitle}</p>
+
                       </div>
 
                       <span className="scheme-chevron">
@@ -255,43 +283,57 @@ export default function Support() {
 
 
                     {/* EXPANDED DETAILS */}
+
                     {isSelected && (
                       <div className="scheme-details">
 
                         <div className="detail-section">
+
                           <h3>ELIGIBILITY</h3>
 
                           <ul>
                             {scheme.eligibility.map((item) => (
-                              <li key={item}>{item}</li>
+                              <li key={item}>
+                                {item}
+                              </li>
                             ))}
                           </ul>
+
                         </div>
 
 
                         <div className="detail-section">
+
                           <h3>BENEFITS</h3>
 
                           <ul>
                             {scheme.benefits.map((item) => (
-                              <li key={item}>{item}</li>
+                              <li key={item}>
+                                {item}
+                              </li>
                             ))}
                           </ul>
+
                         </div>
 
 
                         <div className="detail-section">
+
                           <h3>DOCUMENTS</h3>
 
                           <ul>
                             {scheme.documents.map((item) => (
-                              <li key={item}>{item}</li>
+                              <li key={item}>
+                                {item}
+                              </li>
                             ))}
                           </ul>
+
                         </div>
 
 
                         {/* HOW TO APPLY */}
+
                         <div className="apply-box">
 
                           <div className="apply-heading">
@@ -301,7 +343,9 @@ export default function Support() {
 
                           <p>{scheme.apply}</p>
 
-                          <small>{scheme.verified}</small>
+                          <small>
+                            {scheme.verified}
+                          </small>
 
                         </div>
 
@@ -318,8 +362,7 @@ export default function Support() {
 
         </div>
 
-      </div>
-    </main>
-  </>
-);
+      </main>
+    </div>
+  );
 }

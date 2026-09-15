@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppDataProvider } from "./state/AppDataProvider";
 import { LanguageProvider } from "./state/LanguageProvider";
 import FloatingSOS from "./components/FloatingSOS";
@@ -28,8 +28,15 @@ function App() {
 
           {/* Landing */}
           <Route path="/" element={<Landing />} />
-          <Route path="/login/:role" element={<Login />} />
+          <Route
+  path="/login/fisherman"
+  element={<Navigate to="/dashboard" replace />}
+/>
 
+<Route
+  path="/login/authority"
+  element={<Navigate to="/authority" replace />}
+/>
           {/* Main Pages */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/map" element={<Map />} />

@@ -4,7 +4,7 @@
 
 .intelligence-page {
   width: 100%;
-  min-height: calc(100vh - 61px);
+  min-height: 100vh;
 
   margin: 0;
   padding: 0;
@@ -30,10 +30,13 @@
 
 .intelligence-content {
   width: 100%;
+  min-width: 0;
+  min-height: 100vh;
 
-  padding: 23px 24px 35px;
+  padding: 27px 32px 40px;
 
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 
@@ -181,6 +184,8 @@
   margin-top: 20px;
 
   align-items: stretch;
+
+  min-width: 0;
 }
 
 
@@ -190,6 +195,7 @@
 
 .sar-card {
   width: 100%;
+  min-width: 0;
 
   background: #071624;
 
@@ -279,6 +285,7 @@
 
 .map-grid {
   position: absolute;
+
   inset: 0;
 
   background-image:
@@ -603,13 +610,12 @@
 
 .intelligence-right {
   width: 100%;
+  min-width: 0;
 
   display: flex;
   flex-direction: column;
 
   gap: 20px;
-
-  min-width: 0;
 }
 
 
@@ -925,7 +931,6 @@
    ========================================================= */
 
 @media (max-width: 1050px) {
-
   .intelligence-grid {
     grid-template-columns: 1fr;
   }
@@ -946,10 +951,20 @@
 }
 
 
-@media (max-width: 750px) {
+/* =========================================================
+   TABLET / MOBILE
+   ========================================================= */
 
+@media (max-width: 800px) {
   .intelligence-content {
-    padding: 16px;
+    width: 100%;
+    min-width: 0;
+    min-height: calc(100vh - 56px);
+
+    padding: 76px 20px 30px;
+
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .intelligence-header {
@@ -974,6 +989,7 @@
 
   .sar-footer {
     align-items: flex-start;
+
     flex-direction: column;
 
     gap: 12px;
@@ -983,8 +999,11 @@
 }
 
 
-@media (max-width: 500px) {
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
 
+@media (max-width: 500px) {
   .intelligence-heading h1 {
     font-size: 34px;
   }

@@ -13,13 +13,13 @@ import {
   Globe,
   Menu,
   X,
+  AlertTriangle,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "../state/useLanguage";
 import { languageOptions } from "../i18n/translations";
 import "./Sidebar.css";
-
 
 function Sidebar() {
   const { language, setLanguage, t } = useLanguage();
@@ -33,13 +33,37 @@ function Sidebar() {
   const navItems = [
     { to: "/dashboard", icon: <Home size={18} />, label: t("nav.home") },
     { to: "/map", icon: <Map size={18} />, label: t("nav.map") },
-    { to: "/fishing-zones", icon: <Waves size={18} />, label: t("nav.fishingZones") },
+    {
+      to: "/fishing-zones",
+      icon: <Waves size={18} />,
+      label: t("nav.fishingZones"),
+    },
     { to: "/routes", icon: <Route size={18} />, label: t("nav.routes") },
     { to: "/alerts", icon: <Bell size={18} />, label: t("nav.alerts") },
-    { to: "/ai-assistant", icon: <Bot size={18} />, label: t("nav.aiAssistant") },
+
+    // Emergency SOS
+    {
+      to: "/sos",
+      icon: <AlertTriangle size={18} />,
+      label: "Emergency SOS",
+    },
+
+    {
+      to: "/ai-assistant",
+      icon: <Bot size={18} />,
+      label: t("nav.aiAssistant"),
+    },
     { to: "/ocean", icon: <Waves size={18} />, label: t("nav.ocean") },
-    { to: "/intelligence", icon: <Brain size={18} />, label: t("nav.intelligence") },
-    { to: "/government", icon: <Landmark size={18} />, label: t("nav.support") },
+    {
+      to: "/intelligence",
+      icon: <Brain size={18} />,
+      label: t("nav.intelligence"),
+    },
+    {
+      to: "/government",
+      icon: <Landmark size={18} />,
+      label: t("nav.support"),
+    },
   ];
 
   return (
@@ -56,14 +80,16 @@ function Sidebar() {
         <button
           className="mobile-topbar-toggle"
           onClick={() => setMobileMenuOpen((open) => !open)}
-          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={
+            mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
+          }
           aria-expanded={mobileMenuOpen}
         >
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </header>
 
-      {/* Desktop / tablet sidebar — icon rail, expands on hover */}
+      {/* Desktop / tablet sidebar */}
       <aside className="app-sidebar">
         <NavLink to="/dashboard" className="sidebar-brand">
           <div className="sidebar-logo">
@@ -89,7 +115,7 @@ function Sidebar() {
         </nav>
 
         <div className="sidebar-footer">
-          <button
+          {/*<button
             className="sidebar-item notification-button"
             aria-label={`${t("nav.alerts")}, 1 unread`}
           >
@@ -98,7 +124,7 @@ function Sidebar() {
               <span className="notification-dot" aria-hidden="true" />
             </span>
             <span className="sidebar-label">Notifications</span>
-          </button>
+          </button>*/}
 
           <div className="sidebar-language">
             <button
@@ -135,7 +161,11 @@ function Sidebar() {
             )}
           </div>
 
-          <NavLink to="/profile" className="sidebar-item" title={t("nav.profile")}>
+          <NavLink
+            to="/profile"
+            className="sidebar-item"
+            title={t("nav.profile")}
+          >
             <User size={18} />
             <span className="sidebar-label">{t("nav.profile")}</span>
           </NavLink>
@@ -150,6 +180,7 @@ function Sidebar() {
             aria-label="Close navigation menu"
             onClick={() => setMobileMenuOpen(false)}
           />
+
           <nav className="mobile-nav-drawer" aria-label="Mobile navigation">
             {navItems.map((item) => (
               <NavLink
