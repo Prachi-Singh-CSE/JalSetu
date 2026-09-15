@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "db:init": "node src/db/init.js"
+    "db:init": "node src/db/init.js",
+    "test": "node --test test",
+    "db:import": "node scripts/import-geojson.js"
   },
   "dependencies": {
     "@turf/turf": "^7.1.0",
