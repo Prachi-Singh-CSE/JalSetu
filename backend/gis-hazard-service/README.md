@@ -1,101 +1,153 @@
-# GIS, Hazard, Risk & Emergency Backend (Lavanya's module)
+# JalSetu — GIS, Hazard, Risk & Emergency Backend
 
-Node.js + Express + PostGIS service implementing:
-- **GIS Agent** — map layers (PFZ zones, restricted zones, IMBL boundary, safe harbors, hazards) as GeoJSON
-- **Route Agent** — nearest safe harbor + hazard/restricted-zone-aware safe route suggestion
-- **Risk Agent** — composite Marine Risk Score (wave, wind, cyclone, lightning, hazard proximity, subsurface confidence)
-- **Hazard Agent** — AIS "going dark" anomaly pre-screening + SAR oil-slick/AIS vessel correlation
-- **Emergency/SOS backend** — GPS + nearest safe harbor push to the authority dashboard, plus IMBL boundary dwell-time auto-escalation
+Lavanya's module: **Node.js + Express + PostgreSQL/PostGIS**.
 
-## 1. Install
+## What is implemented
 
+- **GIS Agent**: PFZ, restricted zones, IMBL, safe harbors and hazard overlays as GeoJSON.
+- **Route Agent**: nearest safe harbor and a blocker-aware heuristic route with collision checking.
+- **Risk Agent**: 0–100 composite score using wave, wind, cyclone, lightning, hazard proximity and subsurface-confidence penalty. Upstream weather/ocean field aliases are normalized.
+- **Hazard Agent**: AIS anomaly pre-screen, SAR inference adapter, persistence of SAR detections, and SAR↔AIS correlation.
+- **Emergency/SOS**: GPS + nearest harbor persistence and authority-dashboard delivery status; IMBL dwell-time escalation uses the same delivery path.
+- **Database**: complete PostGIS schema, spatial/time indexes and a GeoJSON importer for authoritative reference data.
+- **Operational checks**: `/health` and `/api/gis/status`.
+
+## Run locally
+
+### 1. Start PostGIS
+
+Docker is the simplest option:
+
+```bash
+docker compose up -d postgis
 ```
-cd gis-hazard-service
+
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-## 2. Set up PostgreSQL + PostGIS
+### 3. Configure environment
 
-Create a database (locally or via Docker), then:
-
-```
+```bash
 cp .env.example .env
-# edit .env with your real DB credentials and dashboard webhook URL
+```
+
+Set the real values for the upstream services and authority receiver. Do **not** commit `.env` or API keys.
+
+### 4. Create the schema
+
+```bash
 npm run db:init
 ```
 
-`npm run db:init` runs `src/db/schema.sql`, which creates every table this
-service needs (`pfz_zones`, `restricted_zones`, `imbl_boundary`,
-`safe_harbors`, `vessel_positions`, `imbl_dwell_tracking`,
-`hazard_detections`, `sos_alerts`) with PostGIS spatial indexes.
+### 5. Load authoritative GIS data
 
-You'll need to seed `imbl_boundary` and `safe_harbors` with real geometry
-before the Route Agent / IMBL check will return anything useful — those are
-static/slow-changing reference layers per the project doc.
+Do not fabricate an IMBL boundary. The importer accepts GeoJSON supplied by the team's approved authoritative source (e.g. NHO/Survey of India where applicable):
 
-## 3. Run
-
+```bash
+node scripts/import-geojson.js imbl path/to/imbl.geojson
+node scripts/import-geojson.js harbors path/to/harbors.geojson
+node scripts/import-geojson.js restricted path/to/restricted.geojson
+node scripts/import-geojson.js pfz path/to/pfz.geojson
 ```
-npm run dev     # with nodemon, auto-restarts on change
-# or
+
+The importer supports `FeatureCollection`, `Feature`, and raw GeoJSON geometry.
+
+### 6. Start service
+
+```bash
 npm start
+# development:
+npm run dev
 ```
 
-Server starts on `http://localhost:5000` (configurable via `PORT` in `.env`).
-Check it's alive: `GET /health`.
+Service: `http://localhost:5000`
 
-## 4. Endpoints
+## API
 
-| Agent | Method & Path | Purpose |
-|---|---|---|
-| GIS | `GET /api/gis/layers` | All map layers combined, for initial map load |
-| GIS | `GET /api/gis/pfz-zones` | PFZ zones GeoJSON |
-| GIS | `GET /api/gis/restricted-zones` | Restricted/protected zones GeoJSON |
-| GIS | `GET /api/gis/imbl-boundary` | IMBL boundary line GeoJSON |
-| GIS | `GET /api/gis/safe-harbors` | Safe harbor points GeoJSON |
-| GIS | `GET /api/gis/hazards?sinceHours=72` | Recent hazard detections GeoJSON |
-| Route | `GET /api/route/nearest-harbor?lat=&lng=` | Nearest safe harbor to a point |
-| Route | `POST /api/route/safe-route` | `{origin:{lat,lng}, destination:{lat,lng}}` → route avoiding hazards/restricted zones |
-| Risk | `GET /api/risk/score?lat=&lng=` | Composite Marine Risk Score at a point |
-| Hazard | `GET /api/hazard/feed` | Combined AIS anomalies + SAR-confirmed hazards (72h) |
-| Hazard | `GET /api/hazard/ais-anomalies?sinceHours=6` | Fast AIS "going dark" pre-screen |
-| Hazard | `POST /api/hazard/correlate` | Run SAR-slick ↔ AIS-vessel correlation on unlinked detections |
-| Hazard | `POST /api/hazard/sar-inference` | `{bbox, sceneDate}` → trigger external Python SAR/U-Net service |
-| Hazard | `POST /api/hazard/imbl-check` | `{vesselId, lat, lng}` → call on every incoming position fix |
-| Emergency | `POST /api/emergency/sos` | `{vesselId, lat, lng}` → trigger SOS, pushes to authority dashboard |
-| Emergency | `GET /api/emergency/alerts?sinceHours=24` | Recent SOS/escalation alerts |
+| Agent | Method | Endpoint | Purpose |
+|---|---|---|---|
+| Health | GET | `/health` | Process health |
+| GIS | GET | `/api/gis/status` | DB/layer readiness |
+| GIS | GET | `/api/gis/layers` | All map layers |
+| GIS | GET | `/api/gis/pfz-zones` | PFZ GeoJSON |
+| GIS | GET | `/api/gis/restricted-zones` | Restricted/protected GeoJSON |
+| GIS | GET | `/api/gis/imbl-boundary` | IMBL GeoJSON |
+| GIS | GET | `/api/gis/safe-harbors` | Harbor GeoJSON |
+| GIS | GET | `/api/gis/hazards?sinceHours=72` | Recent hazards |
+| Route | GET | `/api/route/nearest-harbor?lat=&lng=` | Nearest safe harbor |
+| Route | POST | `/api/route/safe-route` | Avoid known blockers |
+| Risk | GET | `/api/risk/score?lat=&lng=` | Composite marine risk |
+| Hazard | GET | `/api/hazard/feed` | AIS + SAR hazard feed |
+| Hazard | GET | `/api/hazard/ais-anomalies?sinceHours=6` | AIS anomaly screen |
+| Hazard | POST | `/api/hazard/correlate` | SAR↔AIS correlation |
+| Hazard | POST | `/api/hazard/sar-inference` | Trigger SAR service and persist returned detections |
+| Hazard | POST | `/api/hazard/imbl-check` | IMBL proximity/dwell check |
+| Emergency | POST | `/api/emergency/sos` | Create SOS + dashboard delivery |
+| Emergency | GET | `/api/emergency/alerts?sinceHours=24` | Recent alerts |
 
-## 5. What's a placeholder vs. what's real logic
+## Risk contract
 
-**Real, working logic:**
-- All PostGIS queries (GeoJSON layer serving, nearest-harbor via Turf, hazard
-  proximity distance calc, AIS anomaly detection rules, IMBL buffer +
-  dwell-time tracking, SOS insert + dashboard push).
+Preferred upstream response from Prachi's weather/ocean service:
 
-**Placeholders you must wire up with teammates:**
-- `WEATHER_OCEAN_SERVICE_URL` in `risk.service.js` — the exact JSON field
-  names Prachi's service returns (`waveHeightM`, `windSpeedKts`, etc.) are
-  guesses. Confirm with her and adjust `fetchWeatherOceanContext()`.
-- `SAR_INFERENCE_SERVICE_URL` in `hazard.service.js` — actual U-Net
-  inference for oil-slick detection is a Python job; this service either
-  calls that job or reads results already written into `hazard_detections`
-  by an ingestion script (you may need to write that ingestion script, or
-  coordinate with whoever runs the model).
-- `AUTHORITY_DASHBOARD_WEBHOOK_URL` — the real endpoint Dolima's dashboard
-  frontend (or a dashboard backend) exposes to receive alerts.
-- The `suggestSafeRoute()` detour logic in `route.service.js` is a simple
-  v1 (single perpendicular waypoint around blockers) — swap in a proper
-  marine routing engine (e.g. OSRM with a water-only graph) if time allows.
-
-## 6. Git workflow reminder
-
+```json
+{
+  "waveHeightM": 2.1,
+  "windSpeedKts": 18,
+  "cycloneDistanceKm": 120,
+  "lightningRisk": 0.2,
+  "subsurfaceConfidence": 0.82,
+  "stale": false
+}
 ```
+
+The adapter also recognizes snake_case equivalents. Until the upstream service is actually connected, the service explicitly reports `dataStale: true` and marks the source as `default`; it does not present degraded values as live observations.
+
+## Route limitation
+
+The route implementation is a **demo-grade heuristic**: it checks the direct line against restricted/hazard polygons and searches multiple waypoint candidates until it finds a collision-free path. A true production marine route still needs a water-only routing graph/engine, as identified in the team backlog.
+
+## SAR limitation
+
+This service now has the integration and persistence side of SAR/U-Net. It does **not** contain a trained U-Net model. The Python service must return `detections` or `results` containing GeoJSON polygon geometry plus a `confidence` in `[0,1]`.
+
+Example:
+
+```json
+{
+  "detections": [
+    {
+      "geometry": {"type":"Polygon","coordinates":[...]},
+      "confidence": 0.91,
+      "source": "sentinel-1"
+    }
+  ]
+}
+```
+
+## Authority dashboard limitation
+
+The backend is ready to POST SOS/escalation payloads. The actual dashboard receiver URL and authentication credential must be supplied by the dashboard owner. If absent, alerts remain persisted in PostGIS and the API returns `dashboardDelivery.delivered: false`.
+
+## Tests
+
+```bash
+npm test
+```
+
+Current unit tests cover the pure risk scoring/normalization functions. DB integration tests should be run after a PostGIS instance is available.
+
+## Git / PR
+
+```bash
 git checkout -b lavanya-gis-backend
-# ...build inside this folder, e.g. backend/gis-hazard-service...
-git add .
-git commit -m "gis/route/risk/hazard/emergency backend skeleton"
-git checkout main && git pull origin main
-git checkout lavanya-gis-backend && git merge main   # resolve conflicts if any
+npm install
+npm test
+git add backend/gis-hazard-service
+git commit -m "complete GIS hazard risk emergency backend"
 git push origin lavanya-gis-backend
-# open a PR into main
 ```
+
+Then open the PR into Prachi's target branch.
