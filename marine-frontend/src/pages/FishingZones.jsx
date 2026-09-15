@@ -9,9 +9,64 @@ import {
 } from "lucide-react";
 import MarineLeafletMap from "../components/MarineLeafletMap";
 import Sidebar from "../components/Sidebar";
+import { useAppData } from "../state/useAppData";
 import "./FishingZones.css";
 
+// ---------------------------------------------------------------
+// Formatting helpers — never fabricate a value; show "—" when the
+// backend hasn't returned one instead of guessing.
+// ---------------------------------------------------------------
+
+function fmtNumber(value, digits = 1, unit = "") {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+    return "—";
+  }
+  return `${Number(value).toFixed(digits)}${unit}`;
+}
+
+function fmtCoord(position) {
+  if (!Array.isArray(position) || position.length < 2) return "— , —";
+  const [lat, lon] = position;
+  const latDir = lat >= 0 ? "N" : "S";
+  const lonDir = lon >= 0 ? "E" : "W";
+  return `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lon).toFixed(4)}° ${lonDir}`;
+}
+
+function uniqueSources(...lists) {
+  const flat = lists.flat().filter(Boolean);
+  return [...new Set(flat)];
+}
+
 function FishingZones() {
+  const { state } = useAppData();
+  const { pfz, chlorophyll, weather, ocean, location, loading, error } = state;
+
+  // The PFZ agent scores ONE point (the user's current position) per
+  // call, not multiple candidate zones — so only "Your Position" below
+  // is live. Zones B/C stay as clearly-labelled demo comparisons until
+  // a multi-point PFZ endpoint exists on the backend.
+  const liveTemperature =
+    weather?.weather?.temperature ?? pfz?.factors?.seaSurfaceTemperature ?? ocean?.ocean?.seaSurfaceTemperature;
+
+  const liveWave = pfz?.factors?.waveHeight ?? ocean?.ocean?.waveHeight ?? weather?.ocean?.waveHeight;
+
+  const liveChlorophyllValue = pfz?.chlorophyll?.value ?? chlorophyll?.value;
+  const liveChlorophyllUnit = pfz?.chlorophyll?.unit ?? chlorophyll?.unit ?? "mg/m³";
+
+  const livePotential = pfz?.fishingPotential ?? "—";
+  const liveRecommendation = pfz?.recommendation ?? "—";
+  const liveConfidence = pfz?.confidence != null ? `${pfz.confidence}%` : "—";
+
+  const liveSources = uniqueSources(
+    pfz?.ocean?.sources,
+    pfz?.weather?.sources,
+    weather?.sources,
+    ocean?.sources
+  );
+
+  const dataStatusLabel =
+    error ? "OFFLINE — LAST KNOWN" : loading ? "LOADING…" : pfz?.dataHealth?.status || "LIVE";
+
   return (
     <div className="zones-page">
 
@@ -38,7 +93,7 @@ function FishingZones() {
           <div className="location-info">
             <MapPin size={15} />
             <span>Your location</span>
-            <strong>15.2993° N, 73.9116° E</strong>
+            <strong>{fmtCoord(location?.position)}</strong>
           </div>
         </div>
 
@@ -81,18 +136,23 @@ function FishingZones() {
             <div className="map-footer">
 
               <span>
-                Showing 3 candidate zones within 45 km
-                of your position
+                Showing your live position plus 2 demo
+                comparison zones
               </span>
 
               <div className="data-sources">
                 <span>
                   <Database size={12} />
-                  MOSDAC
+                  {dataStatusLabel}
                 </span>
 
-                <span>INCOIS</span>
-                <span>OCEAN MODEL</span>
+                {liveSources.length > 0 ? (
+                  liveSources.map((source) => (
+                    <span key={source}>{source}</span>
+                  ))
+                ) : (
+                  <span>MOSDAC</span>
+                )}
               </div>
 
             </div>
@@ -123,27 +183,31 @@ function FishingZones() {
             </div>
 
 
-            {/* Zone A */}
+            {/* Live zone — your current position */}
             <ZoneCard
-              name="Zone A"
-              distance="18 km away"
-              potential="HIGH"
-              safety="MODERATE"
-              confidence="91%"
-              temperature="27.2°C"
-              wave="1.9 m"
-              chlorophyll="0.86 mg/m³ · elevated"
+              name="Your Position"
+              distance="Live · current position"
+              potential={livePotential}
+              safety={liveRecommendation}
+              confidence={liveConfidence}
+              temperature={fmtNumber(liveTemperature, 1, "°C")}
+              wave={fmtNumber(liveWave, 1, " m")}
+              chlorophyll={
+                liveChlorophyllValue != null
+                  ? `${fmtNumber(liveChlorophyllValue, 2)} ${liveChlorophyllUnit}`
+                  : "—"
+              }
               best
             />
 
 
-            {/* Why Zone A */}
+            {/* Why this position is ranked here */}
             <div className="why-card">
 
               <div className="why-header">
                 <div>
                   <Waves size={15} />
-                  Why Zone A is ranked here
+                  Why this position is ranked here
                 </div>
 
                 <ChevronDown size={15} />
@@ -151,44 +215,51 @@ function FishingZones() {
 
               <ul>
                 <li>
-                  High PFZ potential from thermal front
-                  and chlorophyll gradient
+                  Sea surface temperature:{" "}
+                  {fmtNumber(pfz?.factors?.seaSurfaceTemperature, 1, "°C")}
                 </li>
 
                 <li>
-                  Moderate wave height (1.9 m) along
-                  the recommended route
+                  Wind speed: {fmtNumber(pfz?.factors?.windSpeed, 1, " km/h")}
                 </li>
 
                 <li>
-                  Low cyclone exposure in the next
-                  6 hours
+                  Wave height: {fmtNumber(pfz?.factors?.waveHeight, 1, " m")}
                 </li>
 
                 <li>
-                  Shortest route of all candidate zones
+                  Chlorophyll concentration:{" "}
+                  {liveChlorophyllValue != null
+                    ? `${fmtNumber(liveChlorophyllValue, 2)} ${liveChlorophyllUnit}`
+                    : "—"}
                 </li>
 
                 <li>
-                  No major hazards detected on the approach
+                  Data freshness: {pfz?.dataHealth?.status || "—"}
                 </li>
               </ul>
 
               <div className="confidence-row">
                 <div>
                   <span>CONFIDENCE</span>
-                  <strong>91%</strong>
+                  <strong>{liveConfidence}</strong>
                 </div>
 
                 <div className="confidence-bar">
-                  <div style={{ width: "91%" }}></div>
+                  <div
+                    style={{
+                      width: pfz?.confidence != null ? `${pfz.confidence}%` : "0%",
+                    }}
+                  ></div>
                 </div>
               </div>
 
               <div className="source-row">
-                <span>MOSDAC</span>
-                <span>INCOIS</span>
-                <span>IMD</span>
+                {liveSources.length > 0 ? (
+                  liveSources.map((source) => <span key={source}>{source}</span>)
+                ) : (
+                  <span>—</span>
+                )}
               </div>
 
               <div className="zone-actions">
@@ -207,7 +278,8 @@ function FishingZones() {
             </div>
 
 
-            {/* Zone B */}
+            {/* Zone B — demo comparison (backend doesn't yet score
+                multiple candidate points in one call) */}
             <ZoneCard
               name="Zone B"
               distance="27 km away"
@@ -217,10 +289,11 @@ function FishingZones() {
               temperature="27.9°C"
               wave="3.1 m"
               chlorophyll="1.24 mg/m³ · high"
+              demo
             />
 
 
-            {/* Zone C */}
+            {/* Zone C — demo comparison */}
             <ZoneCard
               name="Zone C"
               distance="34 km away"
@@ -230,6 +303,7 @@ function FishingZones() {
               temperature="26.8°C"
               wave="1.6 m"
               chlorophyll="0.72 mg/m³"
+              demo
             />
 
           </section>
@@ -255,6 +329,7 @@ function ZoneCard({
   wave,
   chlorophyll,
   best = false,
+  demo = false,
 }) {
   return (
     <div className={`zone-card ${best ? "best-zone" : ""}`}>
@@ -271,6 +346,16 @@ function ZoneCard({
           {best && (
             <span className="best-badge">
               BEST OVERALL
+            </span>
+          )}
+
+          {demo && (
+            <span
+              className="best-badge"
+              style={{ background: "#3a4a55" }}
+              title="Static comparison zone — not from a live backend call"
+            >
+              DEMO
             </span>
           )}
         </div>

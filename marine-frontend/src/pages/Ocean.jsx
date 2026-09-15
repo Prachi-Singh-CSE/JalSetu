@@ -1,48 +1,100 @@
 import { useState } from "react";
 import { Waves, Thermometer, ChevronDown, Database } from "lucide-react";
 import Sidebar from "../components/Sidebar";
+import { useAppData } from "../state/useAppData";
 import "./Ocean.css";
+
+// ---------------------------------------------------------------
+// Formatting helpers — show "—" instead of guessing when the
+// backend hasn't returned a value.
+// ---------------------------------------------------------------
+
+function fmtNumber(value, digits = 1, unit = "") {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+    return "—";
+  }
+  return `${Number(value).toFixed(digits)}${unit}`;
+}
+
+// Turn a temperature into a visual bar width (30%-100%) relative to
+// the warmest/coolest reading in the current profile, purely for the
+// existing bar-chart look — this does not change or invent the value
+// shown next to it.
+function widthForTemperature(temp, min, max) {
+  if (!Number.isFinite(temp) || !Number.isFinite(min) || !Number.isFinite(max) || max === min) {
+    return "50%";
+  }
+  const ratio = (temp - min) / (max - min);
+  const pct = 30 + ratio * 70;
+  return `${Math.max(30, Math.min(100, pct)).toFixed(0)}%`;
+}
 
 export default function Ocean() {
   const [showReasoning, setShowReasoning] = useState(false);
+  const { state } = useAppData();
+  const { subsurface, sss, ocean, weather, loading, error } = state;
+
+  // ---------------------------------------------------------------
+  // Build the depth-profile table: row 0 is the live surface reading
+  // (SST from /api/ocean or /api/weather, SSS from /api/sss). Rows
+  // below come from /api/subsurface (Argo observations + OceanEmbed
+  // model, already merged server-side).
+  // ---------------------------------------------------------------
+
+  const surfaceTemperature =
+    ocean?.ocean?.seaSurfaceTemperature ?? weather?.ocean?.seaTemperature ?? null;
+
+  const surfaceSalinity = sss?.value ?? null;
+
+  const subsurfaceRows = Array.isArray(subsurface?.depthProfiles)
+    ? subsurface.depthProfiles
+    : [];
+
+  const allTemps = [
+    surfaceTemperature,
+    ...subsurfaceRows.map((row) => Number(row.temperature)),
+  ].filter((value) => Number.isFinite(value));
+
+  const minTemp = allTemps.length ? Math.min(...allTemps) : null;
+  const maxTemp = allTemps.length ? Math.max(...allTemps) : null;
 
   const profileData = [
     {
+      key: "surface",
       depth: "Surface",
-      temperature: "27.4°C",
-      salinity: "34.6 PSU",
-      type: "OBSERVED",
-      width: "100%",
+      temperature: fmtNumber(surfaceTemperature, 1, "°C"),
+      salinity: fmtNumber(surfaceSalinity, 1, " PSU"),
+      width: widthForTemperature(surfaceTemperature, minTemp, maxTemp),
     },
-    {
-      depth: "10 m",
-      temperature: "27.1°C",
-      salinity: "34.8 PSU",
-      type: "OBSERVED",
-      width: "92%",
-    },
-    {
-      depth: "25 m",
-      temperature: "26.2°C",
-      salinity: "35.0 PSU",
-      type: "OBSERVED",
-      width: "80%",
-    },
-    {
-      depth: "50 m",
-      temperature: "24.8°C",
-      salinity: "35.2 PSU",
-      type: "AI PREDICTION",
-      width: "65%",
-    },
-    {
-      depth: "100 m",
-      temperature: "21.3°C",
-      salinity: "35.4 PSU",
-      type: "AI PREDICTION",
-      width: "30%",
-    },
+    ...subsurfaceRows.map((row, index) => ({
+      key: `depth-${row.depth ?? index}`,
+      depth: Number.isFinite(row.depth) ? `${row.depth} m` : `Row ${index + 1}`,
+      temperature: fmtNumber(row.temperature, 1, "°C"),
+      salinity: fmtNumber(row.salinity, 1, " PSU"),
+      width: widthForTemperature(Number(row.temperature), minTemp, maxTemp),
+    })),
   ];
+
+  // Deepest available reading drives the right-hand "prediction" card,
+  // same as the original design's 50 m example.
+  const deepest = subsurfaceRows.length
+    ? subsurfaceRows[subsurfaceRows.length - 1]
+    : null;
+
+  const correlation = subsurface?.validation?.temperature?.correlation;
+  const validationStatus = subsurface?.validation?.status;
+  const predictionConfidence =
+    validationStatus === "ready" && Number.isFinite(correlation)
+      ? `${Math.max(0, Math.min(100, correlation * 100)).toFixed(0)}%`
+      : "—";
+
+  const dataStatusLabel = error
+    ? "OFFLINE — LAST KNOWN"
+    : loading
+    ? "LOADING…"
+    : subsurface?.dataStatus
+    ? subsurface.dataStatus.toUpperCase()
+    : "—";
 
   return (
     <div className="samudra-ocean-page">
@@ -60,8 +112,9 @@ export default function Ocean() {
 
             <p>
               Below-surface temperature and salinity structure near your
-              position. Values deeper than 25 m are model predictions,
-              not direct measurements.
+              position. Rows below the surface come from Argo
+              observations and the OceanEmbed model, not direct
+              measurements.
             </p>
           </div>
 
@@ -69,11 +122,13 @@ export default function Ocean() {
 
             <span className="samudra-fresh">
               <span className="samudra-fresh-dot"></span>
-              FRESH
+              {dataStatusLabel}
             </span>
 
             <span className="samudra-updated">
-              Last updated 22 min ago
+              {subsurface?.location
+                ? `Near ${subsurface.location.latitude.toFixed(2)}, ${subsurface.location.longitude.toFixed(2)}`
+                : "Awaiting position"}
             </span>
 
             <span className="samudra-tag">
@@ -116,7 +171,7 @@ export default function Ocean() {
               {profileData.map((item) => (
                 <div
                   className="samudra-profile-row"
-                  key={item.depth}
+                  key={item.key}
                 >
 
                   <div className="samudra-depth">
@@ -144,23 +199,31 @@ export default function Ocean() {
 
                   <div
                     className={
-                      item.type === "OBSERVED"
+                      item.key === "surface"
                         ? "samudra-type samudra-observed"
                         : "samudra-type samudra-prediction"
                     }
                   >
-                    {item.type}
+                    {item.key === "surface" ? "LIVE" : "ARGO / MODEL"}
                   </div>
 
                 </div>
               ))}
 
+              {profileData.length === 1 && (
+                <p className="samudra-profile-note">
+                  No subsurface depth profile is available for this
+                  position yet.
+                </p>
+              )}
+
             </div>
 
 
             <p className="samudra-profile-note">
-              Values below 25 m are model predictions, not direct
-              measurements. Use alongside on-board observation.
+              Values below the surface are Argo observations and
+              OceanEmbed model output, not direct measurements. Use
+              alongside on-board observation.
             </p>
 
           </div>
@@ -183,8 +246,10 @@ export default function Ocean() {
                   </div>
 
                   <div>
-                    <h2>Depth: 50 m</h2>
-                    <p>Ocean Model v0.4 (prototype)</p>
+                    <h2>
+                      Depth: {deepest && Number.isFinite(deepest.depth) ? `${deepest.depth} m` : "—"}
+                    </h2>
+                    <p>{subsurface?.source || "Argo / OceanEmbed"}</p>
                   </div>
 
                 </div>
@@ -200,12 +265,12 @@ export default function Ocean() {
 
                 <div className="samudra-value-box">
                   <span>TEMPERATURE</span>
-                  <strong>24.8°C</strong>
+                  <strong>{fmtNumber(deepest?.temperature, 1, "°C")}</strong>
                 </div>
 
                 <div className="samudra-value-box">
                   <span>SALINITY</span>
-                  <strong>35.2 PSU</strong>
+                  <strong>{fmtNumber(deepest?.salinity, 1, " PSU")}</strong>
                 </div>
 
               </div>
@@ -215,13 +280,17 @@ export default function Ocean() {
 
                 <div className="samudra-confidence-top">
                   <span>PREDICTION CONFIDENCE</span>
-                  <strong>81%</strong>
+                  <strong>{predictionConfidence}</strong>
                 </div>
 
                 <div className="samudra-confidence-track">
-                  <div></div>
+                  <div
+                    style={{
+                      width:
+                        predictionConfidence !== "—" ? predictionConfidence : "0%",
+                    }}
+                  ></div>
                 </div>
-
               </div>
 
 
@@ -253,25 +322,29 @@ export default function Ocean() {
                 <div className="samudra-reasoning">
 
                   <p>
-                    The model combines recent surface observations,
-                    historical ocean profiles and current ocean-model
-                    conditions to estimate subsurface temperature and
-                    salinity.
+                    {subsurface?.message ||
+                      "The model combines recent surface observations, Argo float profiles and OceanEmbed's current ocean-model output to estimate subsurface temperature and salinity."}
                   </p>
 
                   <div>
-                    <span>Surface observations</span>
-                    <strong>Observed</strong>
+                    <span>Argo observations</span>
+                    <strong>
+                      {subsurface?.argo?.profileCount ?? 0} profile(s)
+                    </strong>
                   </div>
 
                   <div>
-                    <span>Historical profiles</span>
-                    <strong>Included</strong>
+                    <span>Matched depth points</span>
+                    <strong>
+                      {subsurface?.validation?.matchedObservations ?? 0}
+                    </strong>
                   </div>
 
                   <div>
-                    <span>Ocean model</span>
-                    <strong>v0.4</strong>
+                    <span>OceanEmbed status</span>
+                    <strong>
+                      {subsurface?.oceanEmbed?.dataStatus || "unknown"}
+                    </strong>
                   </div>
 
                 </div>
@@ -280,7 +353,9 @@ export default function Ocean() {
             </div>
 
 
-            {/* CHART CARD */}
+            {/* VALIDATION CARD — real RMSE/MAE/Bias from the backend,
+                replacing the earlier fabricated 5-day chart which the
+                API has no data to support. */}
 
             <div className="samudra-chart-card">
 
@@ -291,73 +366,54 @@ export default function Ocean() {
                 </div>
 
                 <div>
-                  <h2>Predicted vs observed</h2>
+                  <h2>Model validation</h2>
                   <p>
-                    Model check at 25 m over the last five passes
+                    OceanEmbed vs Argo, matched depth observations
                   </p>
                 </div>
 
               </div>
 
+              {subsurface?.validation?.status === "ready" ? (
+                <div className="samudra-value-grid">
+                  <div className="samudra-value-box">
+                    <span>RMSE</span>
+                    <strong>
+                      {fmtNumber(subsurface.validation.temperature.RMSE, 2, "°C")}
+                    </strong>
+                  </div>
 
-              <div className="samudra-chart">
+                  <div className="samudra-value-box">
+                    <span>MAE</span>
+                    <strong>
+                      {fmtNumber(subsurface.validation.temperature.MAE, 2, "°C")}
+                    </strong>
+                  </div>
 
-                <ChartRow
-                  date="05 Sep"
-                  width="82%"
-                  prediction="26.5°"
-                  observed="26.3°"
-                />
+                  <div className="samudra-value-box">
+                    <span>BIAS</span>
+                    <strong>
+                      {fmtNumber(subsurface.validation.temperature.Bias, 2, "°C")}
+                    </strong>
+                  </div>
 
-                <ChartRow
-                  date="06 Sep"
-                  width="76%"
-                  prediction="26.4°"
-                  observed="26.6°"
-                />
-
-                <ChartRow
-                  date="07 Sep"
-                  width="68%"
-                  prediction="26.2°"
-                  observed="26.2°"
-                />
-
-                <ChartRow
-                  date="08 Sep"
-                  width="72%"
-                  prediction="26.1°"
-                  observed="26.4°"
-                />
-
-                <ChartRow
-                  date="09 Sep"
-                  width="70%"
-                  prediction="26.2°"
-                  observed="26.4°"
-                />
-
-              </div>
-
-
-              <div className="samudra-chart-legend">
-
-                <span>
-                  <i className="samudra-observed-legend"></i>
-                  Observed
-                </span>
-
-                <span>
-                  <i className="samudra-prediction-legend"></i>
-                  AI prediction
-                </span>
-
-              </div>
-
+                  <div className="samudra-value-box">
+                    <span>CORRELATION</span>
+                    <strong>
+                      {fmtNumber(subsurface.validation.temperature.correlation, 2)}
+                    </strong>
+                  </div>
+                </div>
+              ) : (
+                <p className="samudra-profile-note">
+                  {subsurface?.validation?.message ||
+                    "Validation pending — no matching Argo depth observations for this position yet."}
+                </p>
+              )}
 
               <div className="samudra-chart-sources">
-                <span>INCOIS</span>
-                <span>OCEAN MODEL</span>
+                <span>ARGO</span>
+                <span>OCEANEMBED</span>
               </div>
 
             </div>
@@ -367,43 +423,6 @@ export default function Ocean() {
         </div>
 
       </div>
-
-    </div>
-  );
-}
-
-
-/* =====================================================
-   CHART ROW
-===================================================== */
-
-function ChartRow({
-  date,
-  width,
-  prediction,
-  observed,
-}) {
-  return (
-    <div className="samudra-chart-row">
-
-      <span className="samudra-chart-date">
-        {date}
-      </span>
-
-      <div className="samudra-chart-track">
-
-        <div
-          className="samudra-chart-observed"
-          style={{ width }}
-        ></div>
-
-        <div className="samudra-chart-marker"></div>
-
-      </div>
-
-      <span className="samudra-chart-value">
-        {prediction} / {observed}
-      </span>
 
     </div>
   );

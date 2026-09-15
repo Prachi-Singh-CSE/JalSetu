@@ -20,8 +20,7 @@ import "./Alerts.css";
 export default function Alerts() {
   const navigate = useNavigate();
   const { state, acknowledgeAlert, markAlertRead, dismissAlert, selectRoute, replayHazardPush } = useAppData();
-  const { t } = useLanguage();
-  const { imbl } = state;
+  const { imbl, alertsMeta } = state;
   const [filter, setFilter] = useState("All");
   const [replayed, setReplayed] = useState(false);
 
@@ -61,6 +60,13 @@ export default function Alerts() {
           {state.dataSources.degraded && (
             <div className="alerts-degraded-state" role="status">
               {state.dataSources.message} {t("dashboard.degradedSuffix")}
+            </div>
+          )}
+
+          {alertsMeta?.dataStatus && alertsMeta.dataStatus !== "live" && (
+            <div className="alerts-degraded-state" role="status">
+              Alert feed status: {alertsMeta.dataStatus.toUpperCase()}
+              {alertsMeta.safety?.message ? ` — ${alertsMeta.safety.message}` : ""}
             </div>
           )}
 
