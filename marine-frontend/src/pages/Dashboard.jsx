@@ -1,7 +1,9 @@
 
 import { useNavigate } from "react-router-dom";
 import MarineLeafletMap from "../components/MarineLeafletMap";
+import IMBLSafetyWarning from "../components/IMBLSafetyWarning";
 import { useAppData } from "../state/useAppData";
+import { useLanguage } from "../state/useLanguage";
 import {
   MapPin,
   Waves,
@@ -20,6 +22,7 @@ import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const {
     state,
@@ -85,12 +88,12 @@ const riskLabel =
 
   const safetyStatus =
   riskLabel === "SEVERE"
-    ? "HIGH RISK"
+    ? t("dashboard.safetyHighRisk")
     : riskLabel === "HIGH"
-    ? "CAUTION ADVISED"
+    ? t("dashboard.safetyCaution")
     : riskLabel === "MODERATE"
-    ? "CAUTION ADVISED"
-    : "SAFE TO SAIL";
+    ? t("dashboard.safetyCaution")
+    : t("dashboard.safetySafe");
 
   /*
    * Decide where the alert's existing View button should go.
@@ -108,13 +111,13 @@ const riskLabel =
       alert.type === "DATA_SOURCE_STALE"
     ) {
       return {
-        label: "View Risk",
+        label: t("dashboard.viewRisk"),
         path: "/intelligence",
       };
     }
 
     return {
-      label: "View",
+      label: t("dashboard.view"),
       path: alert.mapPath || "/map",
     };
   };
@@ -135,13 +138,13 @@ const riskLabel =
         <section className="dashboard-header">
           <div>
             <div className="dashboard-label">
-              MARINE SITUATION
+              {t("dashboard.label")}
             </div>
 
-            <h1>Good morning, Fisherman</h1>
+            <h1>{t("dashboard.greeting")}</h1>
 
             <p>
-              Here's your marine situation for today.
+              {t("dashboard.subtitle")}
             </p>
           </div>
 
@@ -149,7 +152,7 @@ const riskLabel =
             <MapPin size={16} />
 
             <div>
-              <span>YOUR LOCATION</span>
+              <span>{t("dashboard.yourLocation")}</span>
 
               <strong>
                 Arabian Sea · Sector AR-14
@@ -158,35 +161,39 @@ const riskLabel =
           </div>
         </section>
 
+        {/* IMBL boundary warning — local, on-app, and (once the vessel
+            has stayed inside the buffer past the dwell threshold)
+            visually distinct from the authority-dashboard escalation */}
+        <IMBLSafetyWarning />
 
         {/* Situation cards */}
         <section className="situation-grid">
 
           <WeatherCard
             icon={<Thermometer size={19} />}
-            label="SEA TEMPERATURE"
+            label={t("dashboard.seaTemperature")}
             value={marine.ocean.temperature}
-            status="Normal"
+            status={t("dashboard.statusNormal")}
           />
 
           <WeatherCard
             icon={<Wind size={19} />}
-            label="WIND"
+            label={t("dashboard.wind")}
             value={marine.ocean.wind}
-            status="SW · Moderate"
+            status={t("dashboard.statusWindModerate")}
           />
 
           <WeatherCard
             icon={<Waves size={19} />}
-            label="WAVE HEIGHT"
+            label={t("dashboard.waveHeight")}
             value={marine.ocean.waveHeight}
-            status="Moderate"
+            status={t("dashboard.statusModerate")}
           />
 
           <div className="safety-card">
 
             <div className="safety-top">
-              <span>SAFETY SCORE</span>
+              <span>{t("dashboard.safetyScore")}</span>
               <ShieldCheck size={19} />
             </div>
 
@@ -216,7 +223,7 @@ const riskLabel =
             <span>
               {dataSources.message}
               {" "}
-              Recommendations use reduced confidence.
+              {t("dashboard.degradedSuffix")}
             </span>
           </div>
         )}
@@ -227,12 +234,12 @@ const riskLabel =
     <div>
       <div className="panel-label">
         <ShieldCheck size={13} />
-        DATA SOURCE HEALTH
+        {t("dashboard.dataSourceHealth")}
       </div>
 
       <h2>
-        {dataSources.confidenceLevel} confidence ·{" "}
-        {dataSources.healthy}/{dataSources.total} available
+        {dataSources.confidenceLevel} {t("dashboard.confidenceWord")} ·{" "}
+        {dataSources.healthy}/{dataSources.total} {t("dashboard.available").toLowerCase()}
       </h2>
     </div>
 
@@ -241,7 +248,7 @@ const riskLabel =
         dataSources.degraded ? "degraded" : "healthy"
       }`}
     >
-      {dataSources.degraded ? "DEGRADED" : "AVAILABLE"}
+      {dataSources.degraded ? t("dashboard.degraded") : t("dashboard.available")}
     </span>
   </div>
 
@@ -280,11 +287,11 @@ const riskLabel =
               <div>
                 <div className="panel-label">
                   <Navigation size={13} />
-                  MARINE MAP
+                  {t("dashboard.marineMap")}
                 </div>
 
                 <h2>
-                  Current ocean conditions
+                  {t("dashboard.currentOceanConditions")}
                 </h2>
               </div>
 
@@ -292,7 +299,7 @@ const riskLabel =
                 className="panel-button"
                 onClick={() => navigate("/map")}
               >
-                Open map
+                {t("dashboard.openMap")}
                 <ArrowRight size={13} />
               </button>
 
@@ -319,11 +326,11 @@ const riskLabel =
               <div>
                 <div className="panel-label">
                   <AlertTriangle size={13} />
-                  ACTIVE ALERTS
+                  {t("dashboard.activeAlerts")}
                 </div>
 
                 <h2>
-                  Things you should know
+                  {t("dashboard.thingsToKnow")}
                 </h2>
               </div>
 
@@ -386,7 +393,7 @@ const riskLabel =
                 <ShieldCheck size={17} />
 
                 <span>
-                  No active alerts right now.
+                  {t("dashboard.noActiveAlerts")}
                 </span>
               </div>
 
@@ -397,7 +404,7 @@ const riskLabel =
               className="view-alerts"
               onClick={() => navigate("/alerts")}
             >
-              View all alerts
+              {t("dashboard.viewAllAlerts")}
               <ArrowRight size={13} />
             </button>
 
@@ -413,33 +420,31 @@ const riskLabel =
 
             <div className="panel-label">
               <Fish size={13} />
-              AI RECOMMENDATION
+              {t("dashboard.aiRecommendation")}
             </div>
 
             <h2>
-              Zone A looks like your best option today.
+              {t("dashboard.recommendationTitle")}
             </h2>
 
             <p>
-              Strong chlorophyll concentration and favorable
-              ocean conditions make this zone a high-potential
-              fishing area.
+              {t("dashboard.recommendationBody")}
             </p>
 
             <div className="recommendation-details">
 
               <div>
-                <span>POTENTIAL</span>
-                <strong>HIGH</strong>
+                <span>{t("dashboard.potential")}</span>
+                <strong>{t("dashboard.potentialHigh")}</strong>
               </div>
 
               <div>
-                <span>DISTANCE</span>
+                <span>{t("dashboard.distance")}</span>
                 <strong>18 km</strong>
               </div>
 
               <div>
-                <span>CONFIDENCE</span>
+                <span>{t("dashboard.confidence")}</span>
                 <strong>{routeConfidence}%</strong>
               </div>
 
@@ -449,7 +454,7 @@ const riskLabel =
               className="primary-dashboard-button"
               onClick={() => navigate("/fishing-zones")}
             >
-              View fishing zones
+              {t("dashboard.viewFishingZones")}
               <ArrowRight size={14} />
             </button>
 
@@ -460,11 +465,11 @@ const riskLabel =
 
             <div className="panel-label">
               <Navigation size={13} />
-              RECOMMENDED ROUTE
+              {t("dashboard.recommendedRoute")}
             </div>
 
             <h2>
-  {selectedRoute?.name || "Safest route to Zone A"}
+  {selectedRoute?.name || t("dashboard.defaultRouteName")}
 </h2>
 
             <div className="route-info">
@@ -473,7 +478,7 @@ const riskLabel =
                 <Clock size={15} />
 
                 <div>
-                  <span>EST. TIME</span>
+                  <span>{t("dashboard.estTime")}</span>
                   <strong>{selectedRoute?.estimatedTime || "—"}</strong>
                 </div>
               </div>
@@ -483,7 +488,7 @@ const riskLabel =
                 <Navigation size={15} />
 
                 <div>
-                  <span>DISTANCE</span>
+                  <span>{t("dashboard.distance")}</span>
                   <strong>
   {selectedRoute?.distanceKm != null
     ? `${selectedRoute.distanceKm} km`
@@ -498,7 +503,7 @@ const riskLabel =
               className="secondary-dashboard-button"
               onClick={() => navigate("/routes")}
             >
-              Open route planner
+              {t("dashboard.openRoutePlanner")}
               <ArrowRight size={14} />
             </button>
 
@@ -557,8 +562,10 @@ function AlertItem({
   onViewMap,
   onAcknowledge,
   onDismiss,
-  actionLabel = "View",
+  actionLabel,
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className={`alert-item ${type}`}>
 
@@ -586,21 +593,21 @@ function AlertItem({
             type="button"
             onClick={onViewMap}
           >
-            {actionLabel}
+            {actionLabel || t("dashboard.view")}
           </button>
 
           <button
             type="button"
             onClick={onAcknowledge}
           >
-            Acknowledge
+            {t("dashboard.acknowledge")}
           </button>
 
           <button
             type="button"
             onClick={onDismiss}
           >
-            Dismiss
+            {t("dashboard.dismiss")}
           </button>
 
         </div>

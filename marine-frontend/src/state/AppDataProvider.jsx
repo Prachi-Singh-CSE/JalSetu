@@ -1,4 +1,4 @@
-import { useCallback, useReducer } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import {
   getAuthorityAlerts,
   evaluateMarineAlerts,
@@ -13,6 +13,7 @@ import {
   createSOSEvent,
   acknowledgeSOSEvent,
   evaluateIMBLSafety,
+  IMBL_DWELL_THRESHOLD_SECONDS,
   askChat,
   answerWelfareQuestion,
 } from "../services";
@@ -34,6 +35,12 @@ function createInitialState() {
     routeChangeReason: null,
     imbl,
     imblDismissed: false,
+    // Dwell timer for the IMBL buffer zone: `active` starts the moment the
+    // vessel enters a non-SAFE distance band, and resets the instant it
+    // leaves — so a brief drift through the buffer never escalates.
+    // Escalation to the authority dashboard only fires once `elapsedSeconds`
+    // crosses IMBL_DWELL_THRESHOLD_SECONDS while continuously inside.
+    imblDwell: { active: false, enteredAt: null, elapsedSeconds: 0, escalated: false },
     location: {
       position: marine.userPosition,
       status: "fallback",
@@ -112,19 +119,20 @@ function appDataReducer(state, action) {
     case "select-route":
       {
         const imbl = evaluateIMBLSafety({ routeId: action.routeId, marineData: state.marine });
-        const escalation = imbl.escalationRequired
-          ? {
-              id: `IMBL-DEMO-${Date.now()}`,
-              type: "IMBL",
-              title: "IMBL Escalation",
-              location: imbl.location.join(", "),
-              time: "Just now",
-              severity: imbl.status,
-              status: "ACTIVE",
-              distanceKm: imbl.distanceKm,
-              recommendedAction: imbl.recommendedAction,
-            }
-          : null;
+        const wasApproaching = state.imbl.approaching;
+        const nowApproaching = imbl.approaching;
+
+        // Start the dwell clock the instant the vessel enters the buffer;
+        // clear it the instant it leaves. Staying inside across repeated
+        // "select-route" evaluations (or the ticking clock below) is what
+        // eventually triggers escalation — a single crossing does not.
+        let imblDwell = state.imblDwell;
+        if (nowApproaching && !wasApproaching) {
+          imblDwell = { active: true, enteredAt: Date.now(), elapsedSeconds: 0, escalated: false };
+        } else if (!nowApproaching) {
+          imblDwell = { active: false, enteredAt: null, elapsedSeconds: 0, escalated: false };
+        }
+
         return {
           ...state,
           selectedRouteId: action.routeId,
@@ -132,9 +140,39 @@ function appDataReducer(state, action) {
           imbl,
           alerts: evaluateMarineAlerts(state.marine, state.dataSources, imbl),
           imblDismissed: false,
-          imblEscalations: escalation
-            ? [...state.imblEscalations.filter((item) => item.status !== "ACTIVE"), escalation]
-            : state.imblEscalations,
+          imblDwell,
+        };
+      }
+    case "imbl-dwell-tick":
+      {
+        if (!state.imblDwell.active || state.imblDwell.escalated) return state;
+
+        const elapsedSeconds = Math.floor((Date.now() - state.imblDwell.enteredAt) / 1000);
+
+        if (elapsedSeconds < IMBL_DWELL_THRESHOLD_SECONDS) {
+          return { ...state, imblDwell: { ...state.imblDwell, elapsedSeconds } };
+        }
+
+        // Threshold crossed while continuously inside the buffer — this is
+        // the sustained-incursion case, so escalate to the authority
+        // dashboard now (distinct from the on-app warning shown all along).
+        const escalation = {
+          id: `IMBL-DEMO-${Date.now()}`,
+          type: "IMBL",
+          title: "IMBL Escalation — sustained boundary incursion",
+          location: state.imbl.location.join(", "),
+          time: "Just now",
+          severity: state.imbl.status,
+          status: "ACTIVE",
+          distanceKm: state.imbl.distanceKm,
+          dwellSeconds: elapsedSeconds,
+          recommendedAction: state.imbl.recommendedAction,
+        };
+
+        return {
+          ...state,
+          imblDwell: { ...state.imblDwell, elapsedSeconds, escalated: true },
+          imblEscalations: [...state.imblEscalations.filter((item) => item.status !== "ACTIVE"), escalation],
         };
       }
     case "dismiss-imbl":
@@ -227,6 +265,21 @@ export function AppDataProvider({ children }) {
   const replayHazardPush = useCallback(() => dispatch({ type: "replay-hazard-push" }), []);
   const askWelfare = (question) =>
     dispatch({ type: "append-welfare-chat", question });
+
+  // Runs the IMBL dwell clock: while the vessel is inside the buffer zone
+  // and hasn't already escalated, tick once a second so the UI countdown
+  // and the eventual authority-dashboard escalation both advance in real
+  // time. Stops automatically once the vessel leaves the buffer or the
+  // escalation has already fired.
+  useEffect(() => {
+    if (!state.imblDwell.active || state.imblDwell.escalated) return undefined;
+
+    const interval = setInterval(() => {
+      dispatch({ type: "imbl-dwell-tick" });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [state.imblDwell.active, state.imblDwell.escalated, state.imblDwell.enteredAt]);
 
   return (
     <AppDataContext.Provider value={{ state, acknowledgeAlert, markAlertRead, dismissAlert, recordDemoSOS, askQuestion, selectRoute, updateLocation, dismissIMBL, acknowledgeAuthority, setSourceStatus, askWelfare, replayHazardPush }}>
