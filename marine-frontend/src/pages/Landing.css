@@ -81,7 +81,7 @@
 /* ---------------- HEADER ---------------- */
 
 .landing-header {
-  height: 82px;
+  height: 64px;
 
   position: relative;
   z-index: 5;
@@ -90,7 +90,7 @@
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 55px;
+  padding: 0 40px;
 }
 
 .brand {
@@ -114,7 +114,7 @@
 }
 
 .brand-name {
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 800;
   letter-spacing: 0.5px;
 }
@@ -122,7 +122,7 @@
 .brand-subtitle {
   margin-top: 2px;
 
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 2px;
 
   color: #4ac9e5;
@@ -143,7 +143,7 @@
   padding: 8px 12px;
   border-radius: 5px;
 
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.8px;
 }
@@ -162,7 +162,7 @@
 
   border-radius: 9px;
 
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* ---------------- MAIN ---------------- */
@@ -171,14 +171,14 @@
   position: relative;
   z-index: 2;
 
-  min-height: calc(100vh - 82px);
+  min-height: calc(100vh - 64px);
 
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
 
-  gap: 48px;
+  gap: 36px;
 
-  padding: 85px 55px 35px;
+  padding: 40px 40px 32px;
 }
 
 /* ---------------- HERO ---------------- */
@@ -199,19 +199,19 @@
 
   color: #5cd5ed;
 
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 1.7px;
 
   background: rgba(2, 32, 47, 0.55);
 }
 
 .hero-section h1 {
-  margin: 30px 0 16px;
+  margin: 20px 0 14px;
 
-  font-size: clamp(48px, 5vw, 64px);
-  line-height: 0.99;
+  font-size: clamp(30px, 3.2vw, 44px);
+  line-height: 1.08;
 
-  letter-spacing: -2.5px;
+  letter-spacing: -1.2px;
   font-weight: 800;
 }
 
@@ -220,14 +220,14 @@
 }
 
 .hero-description {
-  max-width: 520px;
+  max-width: 480px;
 
   color: #b4c5d0;
 
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.55;
 
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .hero-buttons {
@@ -237,8 +237,6 @@
 
 .primary-button,
 .secondary-button {
-  height: 43px;
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -246,9 +244,10 @@
 
   border-radius: 8px;
 
-  padding: 0 17px;
+  padding: 0 18px;
+  height: 44px;
 
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
 
   cursor: pointer;
@@ -277,17 +276,17 @@
 }
 
 .powered-text {
-  margin-top: 20px;
+  margin-top: 14px;
 
   color: #61798a;
 
-  font-size: 11px;
+  font-size: 13px;
 }
 
 /* ---------------- PROCESS CARDS ---------------- */
 
 .process-grid {
-  margin-top: 34px;
+  margin-top: 22px;
 
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -298,12 +297,12 @@
 }
 
 .process-card {
-  min-height: 75px;
+  min-height: 64px;
 
   display: flex;
-  gap: 10px;
+  gap: 9px;
 
-  padding: 11px;
+  padding: 10px;
 
   border: 1px solid #8495a1;
   border-radius: 10px;
@@ -314,12 +313,12 @@
 .process-number {
   color: #25c6e6;
 
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
 .process-title {
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 1.3px;
 }
@@ -329,7 +328,7 @@
 
   color: #71899b;
 
-  font-size: 9px;
+  font-size: 12.5px;
   line-height: 1.45;
 }
 
@@ -348,7 +347,7 @@
   align-items: flex-start;
   justify-content: center;
 
-  padding-top: 45px;
+  padding-top: 6px;
 }
 
 .portal-card {
@@ -372,7 +371,7 @@
 
   color: #b9cbd7;
 
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 1.7px;
 }
 
@@ -439,7 +438,7 @@
 }
 
 .portal-title {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
 }
 
@@ -448,7 +447,7 @@
 
   color: #718798;
 
-  font-size: 10px;
+  font-size: 13.5px;
 }
 
 .portal-arrow {
@@ -475,7 +474,7 @@
 
   color: #8da6b6;
 
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .dataset-title svg {
@@ -500,7 +499,7 @@
 
   color: #71879a;
 
-  font-size: 8px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -509,11 +508,71 @@
 
   color: #61798a;
 
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
 /* ---------------- RESPONSIVE ---------------- */
+
+/* ---------------- FOOTER ---------------- */
+
+.landing-footer {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  padding: 22px 55px 28px;
+  margin-top: 20px;
+
+  border-top: 1px solid #12293a;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #7c96a6;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.footer-note {
+  color: #4d6577;
+  font-size: 12px;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 18px;
+
+  color: #7c96a6;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.footer-links span {
+  cursor: pointer;
+}
+
+.footer-links span:hover {
+  color: #22c9e9;
+}
+
+@media (max-width: 650px) {
+  .landing-footer {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+}
 
 @media (max-width: 1000px) {
   .landing-content {
@@ -544,7 +603,7 @@
   }
 
   .hero-section h1 {
-    font-size: 43px;
+    font-size: 32px;
   }
 
   .hero-buttons {

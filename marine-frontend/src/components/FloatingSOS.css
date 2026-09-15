@@ -22,7 +22,7 @@
   background: #311b20;
   color: #e0aaad;
   font: inherit;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.7px;
   cursor: pointer;
@@ -42,14 +42,14 @@
   border-radius: 8px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   color: #dce8ed;
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
 .floating-sos-panel p {
   margin: 6px 0 10px;
   color: #91a5b2;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .floating-sos-actions {

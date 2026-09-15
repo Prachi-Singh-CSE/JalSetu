@@ -10,7 +10,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import { useAppData } from "../state/useAppData";
 import "./AuthorityDashboard.css";
 
@@ -42,7 +42,7 @@ function AuthorityDashboard() {
 
   return (
     <div className="authority-page">
-      <Navbar />
+      <Sidebar />
 
       <main className="authority-container">
 

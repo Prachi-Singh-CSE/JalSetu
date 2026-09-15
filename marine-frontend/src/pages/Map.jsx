@@ -27,7 +27,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import IMBLSafetyWarning from "../components/IMBLSafetyWarning";
 import { useAppData } from "../state/useAppData";
 import "./Map.css";
@@ -178,7 +178,7 @@ function Map() {
 
   return (
     <div className="map-page">
-      <Navbar />
+      <Sidebar />
 
       <main className="map-content">
 

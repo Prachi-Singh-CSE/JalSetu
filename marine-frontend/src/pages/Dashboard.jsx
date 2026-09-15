@@ -17,7 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -130,7 +130,7 @@ const riskLabel =
 
   return (
     <div className="dashboard-page">
-      <Navbar />
+      <Sidebar />
 
       <main className="dashboard-content">
 

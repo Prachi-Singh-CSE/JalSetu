@@ -5,6 +5,7 @@ import FloatingSOS from "./components/FloatingSOS";
 import ProactiveHazardBanner from "./components/ProactiveHazardBanner";
 
 import Landing from "./pages/Landing";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import FishingZones from "./pages/FishingZones";
 import RoutesPage from "./pages/Routes";
@@ -27,6 +28,7 @@ function App() {
 
           {/* Landing */}
           <Route path="/" element={<Landing />} />
+          <Route path="/login/:role" element={<Login />} />
 
           {/* Main Pages */}
           <Route path="/dashboard" element={<Dashboard />} />

@@ -8,14 +8,14 @@ import {
   Route,
 } from "lucide-react";
 import MarineLeafletMap from "../components/MarineLeafletMap";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import "./FishingZones.css";
 
 function FishingZones() {
   return (
     <div className="zones-page">
 
-      <Navbar />
+      <Sidebar />
 
       <main className="zones-content">
 

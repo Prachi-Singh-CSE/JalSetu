@@ -1,5 +1,5 @@
 import "./Intelligence.css";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import MarineLeafletMap from "../components/MarineLeafletMap";
 import { useAppData } from "../state/useAppData";
 const evidenceItems = [
@@ -27,7 +27,7 @@ export default function Intelligence() {
 
   return (
     <>
-    <Navbar />
+    <Sidebar />
 
     <main className="intelligence-page">
       <div className="intelligence-content">

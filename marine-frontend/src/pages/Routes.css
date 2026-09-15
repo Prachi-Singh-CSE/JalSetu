@@ -23,7 +23,7 @@
   align-items: center;
   justify-content: space-between;
   color: #718a99;
-  font-size: 11px;
+  font-size: 18px;
   border-bottom: 1px solid rgba(91, 126, 145, 0.18);
 }
 
@@ -50,7 +50,7 @@
 }
 
 .prepared-badge {
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   color: #43d8bc;
   letter-spacing: 0.7px;
@@ -96,7 +96,7 @@
   position: absolute;
   left: 10px;
   color: #4b6675;
-  font-size: 9px;
+  font-size: 14px;
   z-index: 3;
 }
 
@@ -159,7 +159,7 @@
 .hazard {
   position: absolute;
   color: #ff6a32;
-  font-size: 18px;
+  font-size: 29px;
   z-index: 5;
 }
 
@@ -184,7 +184,7 @@
   gap: 5px;
 
   color: #49dd91;
-  font-size: 11px;
+  font-size: 18px;
   font-weight: 600;
 
   background: rgba(5, 22, 28, 0.35);
@@ -268,7 +268,7 @@
   z-index: 10;
 
   color: #62dce5;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -312,7 +312,7 @@
   gap: 4px;
 
   color: #57db9b;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 600;
 
   z-index: 9;
@@ -329,7 +329,7 @@
   gap: 5px;
 
   color: #4dd5a3;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .harbour-1 {
@@ -372,7 +372,7 @@
   align-items: center;
   gap: 5px;
 
-  font-size: 9px;
+  font-size: 14px;
   white-space: nowrap;
 }
 
@@ -423,7 +423,7 @@
 
   color: #e3edf1;
 
-  font-size: 14px;
+  font-size: 22px;
   letter-spacing: 0.7px;
 }
 
@@ -441,7 +441,7 @@
   margin-top: 8px;
 
   color: #91a7b2;
-  font-size: 11px;
+  font-size: 18px;
 }
 
 .route-meta span {
@@ -457,7 +457,7 @@
 
   border-radius: 4px;
 
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .risk-high {
@@ -479,7 +479,7 @@
   border-radius: 4px;
 
   color: #42d69b;
-  font-size: 8px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -492,7 +492,7 @@
 
   border-radius: 6px;
 
-  font-size: 10px;
+  font-size: 16px;
   cursor: pointer;
 }
 
@@ -525,7 +525,7 @@
   padding-left: 13px;
 
   color: #91a8b4;
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -569,7 +569,7 @@
 .reasoning-header h2 {
   margin: 0;
 
-  font-size: 14px;
+  font-size: 22px;
   color: #e1ebef;
 }
 
@@ -592,7 +592,7 @@
   margin: 14px 0;
 
   color: #9aadb6;
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.55;
 }
 
@@ -615,7 +615,7 @@
   color: #d1e0e6;
 
   cursor: pointer;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .reasoning-toggle span {
@@ -657,7 +657,7 @@
   margin: 0;
 
   color: #8fa5b0;
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.45;
 }
 
@@ -682,7 +682,7 @@
 
   color: #738994;
 
-  font-size: 8px;
+  font-size: 13px;
   letter-spacing: 0.3px;
 }
 
@@ -696,7 +696,7 @@
 
   margin-bottom: 5px;
 
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .confidence-label span {
@@ -742,7 +742,7 @@
 
   border-radius: 7px;
 
-  font-size: 10px;
+  font-size: 16px;
   cursor: pointer;
 }
 

@@ -1,10 +1,10 @@
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import "./Profile.css";
 
 function Profile() {
   return (
     <>
-      <Navbar />
+      <Sidebar />
 
       <main className="profile-page">
         <div className="profile-container">

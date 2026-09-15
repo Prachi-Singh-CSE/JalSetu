@@ -12,7 +12,7 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import { useAppData } from "../state/useAppData";
 import "./Alerts.css";
 
@@ -34,7 +34,7 @@ export default function Alerts() {
 
   return (
     <div className="alerts-page">
-      <Navbar />
+      <Sidebar />
 
       <main className="alerts-main">
 

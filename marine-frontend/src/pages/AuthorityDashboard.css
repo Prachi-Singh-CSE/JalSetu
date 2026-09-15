@@ -24,7 +24,7 @@
   gap: 7px;
   margin-bottom: 9px;
   color: #55d6e8;
-  font-size: 11px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -33,7 +33,7 @@
 .authority-header h1 {
   margin: 0;
   color: #f4fbff;
-  font-size: 30px;
+  font-size: 48px;
   line-height: 1.2;
   font-weight: 700;
   letter-spacing: -0.4px;
@@ -43,7 +43,7 @@
   max-width: 650px;
   margin: 9px 0 0;
   color: #8eafc1;
-  font-size: 13px;
+  font-size: 21px;
   line-height: 1.6;
 }
 
@@ -56,7 +56,7 @@
   border: 1px solid #1c4057;
   border-radius: 8px;
   color: #a9c6d5;
-  font-size: 12px;
+  font-size: 19px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -113,14 +113,14 @@
   display: block;
   margin-bottom: 2px;
   color: #7898aa;
-  font-size: 11px;
+  font-size: 18px;
   font-weight: 500;
 }
 
 .authority-stat-card strong {
   display: block;
   color: #f0faff;
-  font-size: 22px;
+  font-size: 35px;
   line-height: 1.25;
   font-weight: 700;
 }
@@ -129,7 +129,7 @@
   display: block;
   margin-top: 2px;
   color: #607f91;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .authority-grid {
@@ -164,7 +164,7 @@
 .card-heading h2 {
   margin: 0;
   color: #eaf7fb;
-  font-size: 16px;
+  font-size: 26px;
   line-height: 1.35;
   font-weight: 650;
 }
@@ -172,7 +172,7 @@
 .card-heading p {
   margin: 4px 0 0;
   color: #718fa1;
-  font-size: 11px;
+  font-size: 18px;
   line-height: 1.4;
 }
 
@@ -185,7 +185,7 @@
   border: 1px solid rgba(67, 217, 177, 0.18);
   border-radius: 6px;
   color: #55d6b0;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.4px;
 }
@@ -242,7 +242,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -323,7 +323,7 @@
   transform: rotate(-12deg);
   padding-top: 6px;
   color: #7faebe;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   text-align: right;
 }
@@ -331,7 +331,7 @@
 .map-label {
   position: absolute;
   color: rgba(142, 202, 220, 0.6);
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -339,7 +339,7 @@
   left: 40%;
   top: 10%;
   color: rgba(177, 224, 235, 0.65);
-  font-size: 14px;
+  font-size: 22px;
   font-weight: 500;
 }
 
@@ -366,7 +366,7 @@
   border-radius: 6px;
   color: #a8c9d7;
   font-family: inherit;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -396,7 +396,7 @@
   align-items: center;
   gap: 6px;
   color: #7896a7;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .map-legend i {
@@ -435,7 +435,7 @@
   border: 1px solid rgba(65, 190, 214, 0.15);
   border-radius: 7px;
   color: #60d4e7;
-  font-size: 11px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -485,7 +485,7 @@
 
 .alert-top strong {
   color: #dceef4;
-  font-size: 12px;
+  font-size: 19px;
   line-height: 1.35;
   font-weight: 650;
 }
@@ -493,7 +493,7 @@
 .severity-label {
   flex-shrink: 0;
   color: #6f8998;
-  font-size: 8px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -505,7 +505,7 @@
   gap: 10px;
   margin-top: 5px;
   color: #6e8b9b;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .alert-meta span {
@@ -526,7 +526,7 @@
   align-items: center;
   gap: 4px;
   color: #7893a1;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .alert-bottom button {
@@ -536,7 +536,7 @@
   border-radius: 6px;
   color: #f1fbff;
   font-family: inherit;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 650;
   cursor: pointer;
   transition:
@@ -558,7 +558,7 @@
   border-radius: 7px;
   color: #64cadc;
   font-family: inherit;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 650;
   cursor: pointer;
   transition:
@@ -594,7 +594,7 @@
 .monitoring-row strong {
   display: block;
   color: #e7f7fb;
-  font-size: 20px;
+  font-size: 32px;
   line-height: 1.2;
   font-weight: 700;
 }
@@ -603,7 +603,7 @@
   display: block;
   margin-top: 3px;
   color: #718c9b;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .progress-section {
@@ -615,7 +615,7 @@
   justify-content: space-between;
   margin-bottom: 7px;
   color: #7893a1;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .progress-label strong {
@@ -647,7 +647,7 @@
   padding: 11px 0;
   border-bottom: 1px solid #16384d;
   color: #86a2b0;
-  font-size: 11px;
+  font-size: 18px;
 }
 
 .source-row:last-child {
@@ -662,7 +662,7 @@
 
 .source-row strong {
   color: #50d0ad;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -673,7 +673,7 @@
 .source-row small {
   max-width: 230px;
   color: #688494;
-  font-size: 8px;
+  font-size: 13px;
   line-height: 1.35;
   text-align: right;
 }
@@ -716,7 +716,7 @@
   }
 
   .authority-header h1 {
-    font-size: 26px;
+    font-size: 42px;
   }
 
   .authority-stats {
@@ -739,11 +739,11 @@
   }
 
   .authority-header h1 {
-    font-size: 24px;
+    font-size: 38px;
   }
 
   .authority-header p {
-    font-size: 12px;
+    font-size: 19px;
   }
 
   .authority-map {
@@ -756,7 +756,7 @@
   }
 
   .map-legend span {
-    font-size: 9px;
+    font-size: 14px;
   }
 
   .card-heading {

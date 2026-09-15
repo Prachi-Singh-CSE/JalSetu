@@ -26,21 +26,21 @@
 
   color: #20c4df;
 
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 1.4px;
 }
 
 .map-page-header h1 {
   margin: 7px 0 5px;
-  font-size: 27px;
+  font-size: 43px;
 }
 
 .map-page-header p {
   margin: 0;
 
   color: #71899b;
-  font-size: 11px;
+  font-size: 18px;
 }
 
 .map-location {
@@ -56,7 +56,7 @@
   background: #071c2a;
 
   color: #9aadb8;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .map-location svg {
@@ -119,7 +119,7 @@
 
   color: #718a9a;
 
-  font-size: 9px;
+  font-size: 14px;
 
   cursor: pointer;
 }
@@ -177,7 +177,7 @@
 
   color: #496a7a;
 
-  font-size: 8px;
+  font-size: 13px;
 }
 
 .coord-1 {
@@ -221,7 +221,7 @@
 
   color: rgba(90, 139, 158, 0.38);
 
-  font-size: 18px;
+  font-size: 29px;
   letter-spacing: 5px;
 }
 
@@ -233,7 +233,7 @@
 
   color: rgba(90, 139, 158, 0.4);
 
-  font-size: 13px;
+  font-size: 21px;
   letter-spacing: 2px;
 }
 
@@ -301,7 +301,7 @@
 
   color: #ff6b6b;
 
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -442,7 +442,7 @@
 
   color: #26c5df;
 
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -517,7 +517,7 @@
 
   color: #9aadb7;
 
-  font-size: 9px;
+  font-size: 14px;
 
   cursor: pointer;
 }
@@ -544,13 +544,13 @@
 
   color: #8197a4;
 
-  font-size: 8px;
+  font-size: 13px;
 }
 
 .legend-title {
   color: #526d7c;
 
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1px;
 }
 
@@ -611,7 +611,7 @@
 
   color: #617b8b;
 
-  font-size: 8px;
+  font-size: 13px;
 }
 
 .map-data-tags {
@@ -628,7 +628,7 @@
 
   color: #7891a0;
 
-  font-size: 7px;
+  font-size: 12px;
 }
 
 
@@ -665,7 +665,7 @@
 
   color: #1bc89c;
 
-  font-size: 8px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -690,7 +690,7 @@
 .condition-section h2 {
   margin: 0 0 12px;
 
-  font-size: 13px;
+  font-size: 21px;
 }
 
 .condition-row {
@@ -726,7 +726,7 @@
 
   color: #5f7889;
 
-  font-size: 7px;
+  font-size: 12px;
 }
 
 .condition-info strong {
@@ -734,13 +734,13 @@
 
   margin-top: 3px;
 
-  font-size: 11px;
+  font-size: 18px;
 }
 
 .condition-row small {
   color: #708897;
 
-  font-size: 8px;
+  font-size: 13px;
 }
 
 
@@ -759,7 +759,7 @@
 
   color: #9bb0bb;
 
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -778,13 +778,13 @@
 .activity-score strong {
   color: #1bc89c;
 
-  font-size: 16px;
+  font-size: 26px;
 }
 
 .activity-score span {
   color: #9aadb7;
 
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .activity-bar {
@@ -813,7 +813,7 @@
 
   color: #688191;
 
-  font-size: 8px;
+  font-size: 13px;
   line-height: 1.5;
 }
 
@@ -826,13 +826,13 @@
 }
 
 .vessel-count strong {
-  font-size: 22px;
+  font-size: 35px;
 }
 
 .vessel-count span {
   color: #728a99;
 
-  font-size: 8px;
+  font-size: 13px;
 }
 
 
@@ -847,7 +847,7 @@
 
   color: #e2af3c;
 
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .hazard-status span {
@@ -880,7 +880,7 @@
 
   color: #00232c;
 
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
 
   cursor: pointer;
@@ -949,7 +949,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 24px;
   background: #0b2337;
   border: 2px solid #55d6e8;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
@@ -1017,7 +1017,7 @@
   box-sizing: border-box !important;
 
   color: #d7e7ef !important;
-  font-size: 12px !important;
+  font-size: 19px !important;
   cursor: pointer !important;
 }
 
@@ -1039,7 +1039,7 @@
 }
 
 .leaflet-popup-content {
-  font-size: 12px;
+  font-size: 19px;
   line-height: 1.5;
 }
 
@@ -1068,7 +1068,7 @@
 
 .pfz-popup strong {
   display: block;
-  font-size: 15px;
+  font-size: 24px;
   margin-bottom: 12px;
   color: #f4fbff;
 }
@@ -1084,12 +1084,12 @@
 }
 
 .pfz-score span {
-  font-size: 11px;
+  font-size: 18px;
   color: #9bb4c2;
 }
 
 .pfz-score b {
-  font-size: 15px;
+  font-size: 24px;
   color: #22c55e;
 }
 
@@ -1097,7 +1097,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: 16px;
   color: #a9c1cc;
   margin-bottom: 12px;
 }
@@ -1116,7 +1116,7 @@
   padding: 8px 10px;
   background: #55d6e8;
   color: #061723;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1132,7 +1132,7 @@
 
 .risk-popup strong {
   display: block;
-  font-size: 15px;
+  font-size: 24px;
   color: #f4fbff;
   margin-bottom: 12px;
 }
@@ -1148,12 +1148,12 @@
 }
 
 .risk-score-large span {
-  font-size: 11px;
+  font-size: 18px;
   color: #9bb4c2;
 }
 
 .risk-score-large b {
-  font-size: 18px;
+  font-size: 29px;
   color: #f59e0b;
 }
 
@@ -1161,7 +1161,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: 18px;
   color: #fbbf24;
   margin-bottom: 12px;
 }
@@ -1188,18 +1188,18 @@
 }
 
 .risk-factors span {
-  font-size: 10px;
+  font-size: 16px;
   color: #8fa9b7;
 }
 
 .risk-factors b {
-  font-size: 10px;
+  font-size: 16px;
   color: #d7e7ef;
 }
 
 .risk-note {
   margin: 12px 0 0;
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.5;
   color: #9bb4c2;
 }
@@ -1217,7 +1217,7 @@
 }
 
 .imbl-popup-header strong {
-  font-size: 15px;
+  font-size: 24px;
   color: #f4fbff;
 }
 
@@ -1230,7 +1230,7 @@
   border-radius: 50%;
   background: rgba(239, 68, 68, 0.12);
   color: #ef4444;
-  font-size: 13px;
+  font-size: 21px;
 }
 
 .imbl-alert {
@@ -1244,18 +1244,18 @@
 }
 
 .imbl-alert span {
-  font-size: 10px;
+  font-size: 16px;
   color: #d7e7ef;
 }
 
 .imbl-alert b {
-  font-size: 9px;
+  font-size: 14px;
   color: #ef4444;
 }
 
 .imbl-popup p {
   margin: 0 0 12px;
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.5;
   color: #9bb4c2;
 }
@@ -1269,12 +1269,12 @@
 }
 
 .imbl-distance span {
-  font-size: 10px;
+  font-size: 16px;
   color: #8fa9b7;
 }
 
 .imbl-distance b {
-  font-size: 10px;
+  font-size: 16px;
   color: #fbbf24;
 }
 
@@ -1285,7 +1285,7 @@
   padding: 8px 10px;
   background: #ef4444;
   color: white;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
 }

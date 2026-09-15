@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import { useAppData } from "../state/useAppData";
 import "./EmergencySOS.css";
 
@@ -84,7 +84,7 @@ function EmergencySOS() {
 
   return (
     <>
-      <Navbar />
+      <Sidebar />
       <main className="sos-page">
         <div className="sos-container">
           <div className="sos-header">

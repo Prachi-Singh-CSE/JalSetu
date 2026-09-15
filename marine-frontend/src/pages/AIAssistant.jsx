@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
 import { useAppData } from "../state/useAppData";
 import { useLanguage } from "../state/useLanguage";
@@ -109,7 +109,7 @@ export default function AIAssistant() {
 
   return (
     <div className="ai-page">
-      <Navbar />
+      <Sidebar />
 
       <main className="ai-main">
         {/* ================= PAGE HEADER ================= */}

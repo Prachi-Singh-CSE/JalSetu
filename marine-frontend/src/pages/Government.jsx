@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
 import { useAppData } from "../state/useAppData";
 import { useLanguage } from "../state/useLanguage";
@@ -94,7 +94,7 @@ export default function Support() {
 
   return (
     <>
-    <Navbar />
+    <Sidebar />
 
     <main className="support-page">
       <div className="support-content">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Waves, Thermometer, ChevronDown, Database } from "lucide-react";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import "./Ocean.css";
 
 export default function Ocean() {
@@ -47,7 +47,7 @@ export default function Ocean() {
   return (
     <div className="samudra-ocean-page">
 
-      <Navbar />
+      <Sidebar />
 
       <div className="samudra-ocean-content">
 

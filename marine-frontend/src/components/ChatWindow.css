@@ -61,7 +61,7 @@
 
   color: #e8f6f7;
 
-  font-size: 10px;
+  font-size: 16px;
   line-height: 1.45;
 }
 
@@ -97,7 +97,7 @@
 
   color: #a9b9c2;
 
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -128,14 +128,14 @@
   border-radius: 3px;
 
   color: #708895;
-  font-size: 6px;
+  font-size: 12px;
 }
 
 .message-sources small {
   margin-left: auto;
 
   color: #627985;
-  font-size: 7px;
+  font-size: 12px;
 }
 
 /* ================= REASONING ================= */
@@ -161,7 +161,7 @@
 
   color: #cad9df;
 
-  font-size: 9px;
+  font-size: 14px;
 
   cursor: pointer;
 }
@@ -190,7 +190,7 @@
 
   color: #8298a5;
 
-  font-size: 8px;
+  font-size: 13px;
 }
 
 .reasoning-details p {
@@ -231,7 +231,7 @@
 
   color: #4acbd4;
 
-  font-size: 7px;
+  font-size: 12px;
 
   cursor: pointer;
 }
@@ -276,7 +276,7 @@
 
   color: #dce7eb;
 
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .chat-input input::placeholder {
@@ -342,7 +342,7 @@
 
   color: #dff7f8;
 
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 600;
 
   cursor: pointer;
@@ -353,5 +353,5 @@
 
   color: #566e7b;
 
-  font-size: 7px;
+  font-size: 12px;
 }

@@ -9,7 +9,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import MarineLeafletMap from "../components/MarineLeafletMap";
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import { useAppData } from "../state/useAppData";
 import "./Routes.css";
 
@@ -23,7 +23,7 @@ export default function Routes() {
 
   return (
     <div className="routes-page">
-      <Navbar />
+      <Sidebar />
 
       <main className="routes-main">
 

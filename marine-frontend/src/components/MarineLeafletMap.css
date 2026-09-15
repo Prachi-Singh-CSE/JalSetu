@@ -55,7 +55,7 @@
   color: #9aadb7;
 
   font-family: Inter, Arial, sans-serif;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .marine-leaflet-map .leaflet-control-layers-toggle {
@@ -86,7 +86,7 @@
 
 .marine-leaflet-map .leaflet-popup-content {
   font-family: Inter, Arial, sans-serif;
-  font-size: 11px;
+  font-size: 18px;
   line-height: 1.5;
 }
 
@@ -118,7 +118,7 @@
 
   border-radius: 50%;
 
-  font-size: 14px;
+  font-size: 22px;
   font-weight: 700;
 }
 
@@ -145,7 +145,7 @@
 
   border: 1px solid #34708a;
 
-  font-size: 12px;
+  font-size: 19px;
 
   opacity: 0.95;
 }
@@ -246,7 +246,7 @@
 
   color: #20c5df;
 
-  font-size: 20px;
+  font-size: 32px;
 
   cursor: pointer;
 }

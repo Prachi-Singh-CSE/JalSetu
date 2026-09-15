@@ -83,10 +83,10 @@ function Landing() {
 
             <button
               className="primary-button"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/login/fisherman")}
             >
               <ArrowRight size={17} />
-              Login / Continue as Fisherman
+              Login as Fisherman
             </button>
 
             <button
@@ -184,18 +184,21 @@ function Landing() {
               title="Fisherman Portal"
               description="Risk score, fishing zones, safe routes, SOS and the AI copilot."
               active
+              onClick={() => navigate("/login/fisherman")}
             />
 
             <PortalOption
               icon={<Shield size={19} />}
               title="Authority Dashboard"
               description="Fleet map, SOS response, incident triage and hazard verification."
+              onClick={() => navigate("/login/authority")}
             />
 
             <PortalOption
               icon={<SlidersHorizontal size={19} />}
               title="Regulator / Admin"
               description="Sector analytics, compliance reports and data-source governance."
+              onClick={() => navigate("/login/regulator")}
             />
 
             {/* Demo dataset */}
@@ -229,6 +232,22 @@ function Landing() {
 
       </main>
 
+      {/* Footer */}
+      <footer className="landing-footer">
+        <div className="footer-brand">
+          <Anchor size={16} />
+          SAMUDRA
+        </div>
+        <div className="footer-note">
+          Built for Smart India Hackathon 2026 · Demo intelligence platform, not an operational safety service.
+        </div>
+        <div className="footer-links">
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>Contact</span>
+        </div>
+      </footer>
+
     </div>
   );
 }
@@ -240,9 +259,10 @@ function PortalOption({
   title,
   description,
   active = false,
+  onClick,
 }) {
   return (
-    <button className={`portal-option ${active ? "active" : ""}`}>
+    <button className={`portal-option ${active ? "active" : ""}`} onClick={onClick}>
 
       <div className="portal-icon">
         {icon}

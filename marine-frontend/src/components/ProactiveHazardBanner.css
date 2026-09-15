@@ -74,7 +74,7 @@
 
   margin-bottom: 3px;
 
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.4px;
 }
@@ -94,7 +94,7 @@
 .proactive-hazard-body strong {
   display: block;
 
-  font-size: 12px;
+  font-size: 19px;
 
   color: #f1f5f7;
 }
@@ -102,7 +102,7 @@
 .proactive-hazard-body p {
   margin: 3px 0 8px;
 
-  font-size: 10.5px;
+  font-size: 17px;
   line-height: 1.4;
 
   color: #b4c4cf;
@@ -119,7 +119,7 @@
   background: none;
   cursor: pointer;
 
-  font-size: 10.5px;
+  font-size: 17px;
   font-weight: 700;
 
   padding: 0;
