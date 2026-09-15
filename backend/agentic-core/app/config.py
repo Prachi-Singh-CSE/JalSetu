@@ -36,6 +36,12 @@ class Settings:
     BHASHINI_API_URL: str = os.getenv("BHASHINI_API_URL", "")
     BHASHINI_API_KEY: str = os.getenv("BHASHINI_API_KEY", "")
 
+    # Session store backend: "memory" (default, single-process, zero setup)
+    # or "redis" (multi-instance deploy). Falls back to memory automatically
+    # if redis isn't installed/reachable -- see session_manager.py.
+    SESSION_BACKEND: str = os.getenv("SESSION_BACKEND", "memory").strip().lower()
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
     # Real, free, no-key public data sources used as stand-ins until
     # Prachi's INCOIS/IMD/MOSDAC pipeline and OceanEmbed model are live.
     OPEN_METEO_FORECAST_URL: str = os.getenv("OPEN_METEO_FORECAST_URL", "https://api.open-meteo.com/v1/forecast")

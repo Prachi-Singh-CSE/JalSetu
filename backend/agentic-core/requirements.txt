@@ -8,3 +8,7 @@ python-multipart==0.0.9
 python-dotenv==1.0.1
 pytest==8.3.3
 pytest-asyncio==0.24.0
+
+# Only imported/required if SESSION_BACKEND=redis (see app/session_manager.py).
+# Safe to leave installed even when running the default in-memory backend.
+redis==5.0.8

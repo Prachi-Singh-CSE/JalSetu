@@ -59,6 +59,11 @@ async def _run_chat_pipeline(req: ChatRequest) -> ChatResponse:
 
     language = req.language or detect_language(req.text)
     session.language = language
+    # Persist the location/language set above before doing anything else --
+    # required for correctness on the Redis backend, where get_or_create()
+    # returns a fresh deserialized copy each call rather than a shared
+    # in-memory reference (see session_manager.save's docstring).
+    session_manager.save(session)
 
     plan = await planner_agent.plan(req.text, language, session)
 
@@ -187,6 +192,7 @@ def health():
         "status": "ok",
         "llm_live": llm_client.is_live(),
         "bhashini_configured": multilingual_pipeline.is_configured(),
+        "session_backend": "redis" if type(session_manager._store).__name__ == "_RedisStore" else "memory",
         "downstream_services": {
             "weather_agent_url": bool(settings.WEATHER_AGENT_URL),
             "ocean_agent_url": bool(settings.OCEAN_AGENT_URL),

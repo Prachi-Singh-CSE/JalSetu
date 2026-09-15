@@ -113,5 +113,26 @@ not "demo data" in the shipped app.
 - **Risk formula is a simple, documented 2-input placeholder** (wave +
   wind only) — intentionally transparent rather than a black box, and
   clearly labelled `not_yet_included` for what Lavanya's full Risk Agent adds.
-- Session state is in-memory (per-process) — swap for Redis for a
-  multi-instance deploy; not needed for a single-server demo/hackathon build.
+
+## Session storage
+
+`SESSION_BACKEND` (`.env`) picks the store:
+
+- `memory` (default) — a plain per-process dict, zero setup. Matches the
+  original hackathon behaviour exactly. Sessions vanish on restart and
+  aren't shared across instances — fine for a single-server demo.
+- `redis` — sessions are JSON-serialized into Redis (`REDIS_URL`) with a
+  sliding TTL (`SESSION_TTL_MINUTES`), so they survive restarts and are
+  shared across multiple app instances. If Redis is unreachable at
+  startup, the service logs a loud warning and falls back to the
+  in-memory store rather than crashing — same "never silently pretend it
+  worked" rule as the rest of this module.
+
+`GET /health` reports which backend is actually active (`session_backend`),
+so this is verifiable rather than something you have to take on faith.
+
+```bash
+# .env
+SESSION_BACKEND=redis
+REDIS_URL=redis://localhost:6379/0
+```
